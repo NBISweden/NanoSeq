@@ -1,0 +1,18 @@
+[project]
+authors = ["CormacKinsella <27350062+CormacKinsella@users.noreply.github.com>"]
+channels = ["conda-forge", "bioconda"]
+description = "Nanoseq fork pixi base dependencies"
+name = "nanoseq-fork pixi project"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[system-requirements]
+linux="3.10"
+# TODO: libc="2.17"
+
+
+[tasks]
+
+[dependencies]
+nextflow="24.10.0"
+apptainer="1.3.6"
