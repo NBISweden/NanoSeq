@@ -1,3 +1,10 @@
-
+# General
+.nextflow*
+output
+work
+trace-*
 .pixi
 *.egg-info
+
+# Local
+TEMP_STORE/*
