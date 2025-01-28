@@ -1,1 +1,5 @@
-id,duplex_fastq1,duplex_fastq2,normal_fastq1,normal_fastq2
+id,input_format,mapping_required,duplex_1,duplex_2,normal_1,normal_2,normal_method
+gherkin,fastq,true,./data/reads/duplex1.fq.gz,./data/reads/duplex2.fq.gz,./data/reads/normal1.fq.gz,./data/reads/normal2.fq.gz,duplex
+gherkin2,fastq,true,./data/reads/duplex1.fq.gz,./data/reads/duplex2.fq.gz,./data/reads/normal1.fq.gz,./data/reads/normal2.fq.gz,standard
+gherkin3,fastq,true,./data/reads/duplex1.fq.gz,./data/reads/duplex2.fq.gz,./data/reads/normal1.fq.gz,./data/reads/normal2.fq.gz,duplex
+gherkin4,bam,true,./data/reads/duplex1.fq.gz,./data/reads/duplex2.fq.gz,./data/reads/normal1.fq.gz,./data/reads/normal2.fq.gz,duplex
