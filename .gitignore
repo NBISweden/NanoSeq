@@ -5,6 +5,7 @@ work
 trace-*
 .pixi
 *.egg-info
+data/reads/*
 
 # Local
 TEMP_STORE/*
