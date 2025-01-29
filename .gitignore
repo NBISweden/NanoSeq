@@ -5,7 +5,13 @@ work
 trace-*
 .pixi
 *.egg-info
+
+# Data inputs
+data/genome/*
+!data/genome/README.md
 data/reads/*
+!data/reads/README.md
 
 # Local
 TEMP_STORE/*
+cleanup-selective.sh
