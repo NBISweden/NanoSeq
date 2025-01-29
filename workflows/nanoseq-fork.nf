@@ -12,6 +12,7 @@ Main workflow definition
 
 	include { BWA_MEM2_INDEX } from '../modules/bwa-index.nf'
 	include { SAMTOOLS_INDEX } from '../modules/samtools-index.nf'
+	include { BWA_MEM2_MAP } from '../modules/bwa-map.nf'
 	include { TEST } from '../modules/test.nf'
 
 // Parse reference genome & indexes (create latter if missing)
@@ -48,36 +49,7 @@ Main workflow definition
 	// Run function. If index exists, add to a channel. If no, set channel variable to null for later creation.
 	ch_samtools_index = samtoolsIndexExists(reference_fasta) ? Channel.fromPath("${reference_fasta}.dict") : null
 
-
-
-
-
-
-
-
-//TODO: next the DICT index. check how many outputs are created here also, may need to do similar
-	//ch_dict = file("${reference_fasta}.dict").exists() ? Channel.fromPath("${reference_fasta}.dict") : null
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Process samplesheet
+// Parse samplesheet
 
 	// Initialise empty set to store unique sample ids
 	def uniqueIds = new HashSet<String>()
@@ -88,8 +60,13 @@ Main workflow definition
 		.splitCsv(header: true)
 		.map { row ->
 
-			// Populate id, format, and mapping metadata fields from samplesheet
-			def meta = [id: row.id, format: row.input_format.toLowerCase(), mapping:row.mapping_required.toLowerCase()]
+			// Populate metadata fields from samplesheet
+			def meta = [
+				id: row.id,
+				format: row.input_format.toLowerCase(),
+				mapping:row.mapping_required.toLowerCase(),
+				normalMethod: row.normal_method.toLowerCase()
+			]
 
 			// Check id names are unique
 			if (!uniqueIds.add(meta.id)) {
@@ -107,53 +84,58 @@ Main workflow definition
 			}
 			meta.mapping = meta.mapping.toBoolean()
 
-			// If checks pass, add metadata fields appropriate to the input format, check files exist, and check the matched normal sequencing method is recognised
+			// Check that matched normal sequencing method is either duplex or standard
+			if (!['duplex', 'standard'].contains(meta.normalMethod)) {
+				error ("ERROR: Sample '${meta.id}' has an invalid 'normal_method' value '${meta.normalMethod}'. Please only supply 'duplex' or 'standard', depending on how your matched normal samples were sequenced (case insensitive).")
+			}
+
+			// If initial checks pass, add file paths specific to input format & check their existence
 
 			// FASTQ
 			if (meta.format == 'fastq') {
-				meta.duplex1 = file(row.duplex_1, checkIfExists: true)
-				meta.duplex2 = file(row.duplex_2, checkIfExists: true)
-				meta.normal1 = file(row.normal_1, checkIfExists: true)
-				meta.normal2 = file(row.normal_2, checkIfExists: true)
-				meta.normalMethod = row.normal_method.toLowerCase()
-				if (!['duplex', 'standard'].contains(meta.normalMethod)) {
-					error ("ERROR: Sample '${meta.id}' has an invalid 'normal_method' value '${meta.normalMethod}'. Please only supply 'duplex' or 'standard', depending on how your matched normal samples were sequenced (case insensitive).")
-				}
-				return meta
+				def files = [
+					file(row.duplex_1, checkIfExists: true),
+					file(row.duplex_2, checkIfExists: true),
+					file(row.normal_1, checkIfExists: true),
+					file(row.normal_2, checkIfExists: true)
+				]
+				return [meta, files]
 
-			// BAM (if remapping is required, allow the index to be absent)
+			// BAM (if remapping is required, don't add indexes to the map, keep value position consistent)
 			} else if (meta.format == 'bam') {
-				meta.duplexBam = file(row.duplex_1, checkIfExists: true)
-				meta.normalBam = file(row.normal_1, checkIfExists: true)
-				if (!meta.mapping) {
-					meta.duplexIndex = row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs a duplex index file when mapping is required.")
-					meta.normalIndex = row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs a matched normal index file when mapping is required.")
+				if (meta.mapping) {
+					def files = [
+						file(row.duplex_1, checkIfExists: true),
+						file(row.normal_1, checkIfExists: true)
+					]
+					return [meta, files]
 				} else {
-					meta.duplexIndex = row.duplex_2 ? file(row.duplex_2, checkIfExists: false) : null
-					meta.normalIndex = row.normal_2 ? file(row.normal_2, checkIfExists: false) : null
+					def files = [
+						file(row.duplex_1, checkIfExists: true),
+						file(row.normal_1, checkIfExists: true),
+						row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required."),
+						row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required.")
+					]
+					return [meta, files]
 				}
-				meta.normalMethod = row.normal_method.toLowerCase()
-				if (!['duplex', 'standard'].contains(meta.normalMethod)) {
-					error ("ERROR: Sample '${meta.id}' has an invalid 'normal_method' value '${meta.normalMethod}'. Please only supply 'duplex' or 'standard', depending on how your matched normal samples were sequenced (case insensitive).")
-				}
-				return meta
 
-			// CRAM (if remapping is required, allow the index to be absent)
+			// CRAM (if remapping is required, don't add indexes to the map, keep value position consistent)
 			} else if (meta.format == 'cram') {
-				meta.duplexCram = file(row.duplex_1, checkIfExists: true)
-				meta.normalCram = file(row.normal_1, checkIfExists: true)
-				if (!meta.mapping) {
-					meta.duplexIndex = row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs a duplex index file when mapping is required.")
-					meta.normalIndex = row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs a matched normal index file when mapping is required.")
+				if (meta.mapping) {
+					def files = [
+						file(row.duplex_1, checkIfExists: true),
+						file(row.normal_1, checkIfExists: true)
+					]
+					return [meta, files]
 				} else {
-					meta.duplexIndex = row.duplex_2 ? file(row.duplex_2, checkIfExists: false) : null
-					meta.normalIndex = row.normal_2 ? file(row.normal_2, checkIfExists: false) : null
+					def files = [
+						file(row.duplex_1, checkIfExists: true),
+						file(row.normal_1, checkIfExists: true),
+						row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required."),
+						row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required.")
+					]
+					return [meta, files]
 				}
-				meta.normalMethod = row.normal_method.toLowerCase()
-				if (!['duplex', 'standard'].contains(meta.normalMethod)) {
-					error ("ERROR: Sample '${meta.id}' has an invalid 'normal_method' value '${meta.normalMethod}'. Please only supply 'duplex' or 'standard', depending on how your matched normal samples were sequenced (case insensitive).")
-				}
-				return meta
 			}
 		}
 
@@ -173,6 +155,14 @@ Main workflow definition
 				ch_samtools_index = SAMTOOLS_INDEX.out.ch_samtools_index
 			}
 
+		// Map samples
+			BWA_MEM2_MAP(ch_samplesheet, ch_reference_fasta.collect(), ch_bwa_indexes.collect())
+
+
+
+
+
+
 		// TEST PROCESS
 			TEST(ch_samtools_index)
 
@@ -188,4 +178,3 @@ Main workflow definition
 				.collectFile(name: 'package_versions.txt', newLine: true, storeDir: 'output/package_versions')
 
 	}
-
