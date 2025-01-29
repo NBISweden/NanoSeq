@@ -11,9 +11,10 @@ Main workflow definition
 // Import modules
 
 	include { BWA_MEM2_INDEX } from '../modules/bwa-index.nf'
+	include { SAMTOOLS_INDEX } from '../modules/samtools-index.nf'
 	include { TEST } from '../modules/test.nf'
 
-// Parse reference genome & check for indexes
+// Parse reference genome & indexes (create latter if missing)
 
 	// Define FASTA file
 	def fasta_extensions = ['fa', 'fna', 'fasta']
@@ -30,14 +31,24 @@ Main workflow definition
 		error ("ERROR: Reference file not found at '${reference_fasta}'. Please check you've set the parameters '--reference_path' and '--fasta' correctly.")
 	}
 
-	// Define function to check if BWA indexes exist, returns true if all are found
+	// Function to check if BWA indexes exist, returns true if all are found
 	indexExtensions = ['.0123', '.amb', '.ann', '.bwt.2bit.64', '.pac']
 	def bwaIndexesExist(fasta) {
 		return indexExtensions.every { ext -> file("${fasta}${ext}").exists() }
 	}
 
-	// Run function. If they exist, add them to a channel. If no, set channel to null for later index creation.
+	// Run function. If indexes exist, add to a channel. If no, set channel variable to null for later creation.
 	ch_bwa_indexes = bwaIndexesExist(reference_fasta) ? Channel.value(indexExtensions.collect { ext -> file("${reference_fasta}${ext}") }) : null
+
+	// Function to check if samtools dict exists, returns true if found
+	def samtoolsIndexExists(fasta) {
+		return file("${fasta}.dict").exists()
+	}
+
+	// Run function. If index exists, add to a channel. If no, set channel variable to null for later creation.
+	ch_samtools_index = samtoolsIndexExists(reference_fasta) ? Channel.fromPath("${reference_fasta}.dict") : null
+
+
 
 
 
@@ -156,12 +167,14 @@ Main workflow definition
 				ch_bwa_indexes = BWA_MEM2_INDEX.out.ch_bwa_indexes
 			}
 
-		// Create dict index
-
+		// Create dict index if it doesn't exist
+			if (ch_samtools_index == null) {
+				SAMTOOLS_INDEX(ch_reference_fasta)
+				ch_samtools_index = SAMTOOLS_INDEX.out.ch_samtools_index
+			}
 
 		// TEST PROCESS
-			TEST(ch_bwa_indexes)
-
+			TEST(ch_samtools_index)
 
 		// Report package versions
 
