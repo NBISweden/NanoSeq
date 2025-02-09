@@ -56,7 +56,7 @@ Main workflow definition
 
 	// Load samplesheet
 	def ch_samplesheet = Channel
-		.fromPath("${params.samplesheet}")
+		.fromPath("${params.samplesheetPath}/${params.samplesheet}")
 		.splitCsv(header: true)
 		.map { row ->
 
