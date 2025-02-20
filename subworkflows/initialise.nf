@@ -126,13 +126,6 @@ workflow INITIALISE {
 							}
 						}
 					}
-					.branch {
-						fastq: it.meta.format == 'fastq'
-						bam_map: it.meta.format == 'bam' && it.meta.mapping
-						bam_nomap: it.meta.format == 'bam' && !it.meta.mapping
-						cram_map: it.meta.format == 'cram' && it.meta.mapping
-						cram_nomap: it.meta.format == 'cram' && !it.meta.mapping
-					}
 					.set { ch_samplesheet }
 
 		// Parse reference genome & optional indexes (workflow creates them if missing)
@@ -153,7 +146,7 @@ workflow INITIALISE {
 
 		// Emit channels to main workflow
 
-			ch_samplesheet = ch_samplesheet
-			ch_reference = ch_reference
+			ch_samplesheet
+			ch_reference
 
 }
