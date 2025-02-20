@@ -28,10 +28,10 @@ process BWA_MEM2_MAP {
 
 	bwa-mem2 mem ${args} -t ${task.cpus} ${reference_fasta} ${reads} \\
 		| samtools sort --threads ${task.cpus} ${args2} - \\
-		| samtools view --threads ${task.cpus} -T ${reference_fasta} -o ${meta.id}.cram
+		| samtools view --threads ${task.cpus} -T ${reference_fasta} -o ${meta.id}_${meta.type}.cram
 
 	# TODO: unsure why this line needed (creates empty index file), kept temporarily
-	touch ${meta.id}.cram.crai
+	touch ${meta.id}_${meta.type}.cram.crai
 
 	"""
 
