@@ -51,20 +51,18 @@ Main workflow
 
 				// FASTQ
 
-					// Multimap the FASTQ input channel to emit duplex and normal reads separately
+					// Create separate FASTQ channels of duplex and normal reads for parallel processing
 
 						ch_samplesheet.fastq
 							.multiMap { meta, files ->
-								meta_duplex = meta.clone() // Clone metadata without editing original
-								meta_normal = meta.clone()
-								meta_duplex["type"] = "duplex" // Add type to metadata
-								meta_normal["type"] = "normal"
-								duplex: [meta_duplex, [files[0], files[1]]] // Emit read types as separate channels for parallel processing
+								meta_duplex = meta + [type: "duplex"]
+								meta_normal = meta + [type: "normal"]
+								duplex: [meta_duplex, [files[0], files[1]]]
 								normal: [meta_normal, [files[2], files[3]]]
 							}
 							.set { ch_fastqs }
 
-					// Add NanoSeq tags to FASTQ, both duplex and normal channels
+					// Add NanoSeq tags to FASTQ, take both duplex and normal read channels
 
 						ADD_NANOSEQ_FASTQ_TAGS(ch_fastqs.duplex.mix(ch_fastqs.normal))
 
