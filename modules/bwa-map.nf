@@ -5,52 +5,34 @@ process BWA_MEM2_MAP {
 	debug true
 	tag "${meta.id}"
 	label 'process_medium'
-	container 'oras://community.wave.seqera.io/library/bwa-mem2:2.2.1--e269358148d98816'
+	container 'oras://community.wave.seqera.io/library/bwa-mem2_htslib_samtools:ada17f4d0d757cc3'
 
 	// I/O & script
 
 	input:
-	tuple val(meta), path(input_files)
-	path (reference_fasta)
-	path (bwa_indexes)
+	tuple val(meta), path(reads)
+	path reference_fasta
+	path bwa_indexes
 
 	output:
-	//FIXME: path(), emit: 
-
+	tuple val(meta), path("${meta.id}.cram"), path("${meta.id}.cram.crai"), emit: ch_cram // TODO: revisit this inherited placeholder crai file
 	tuple val(task.process), val('bwa-mem2'), eval('bwa-mem2 version 2>/dev/null'), topic: versions
+	tuple val(task.process), val('samtools'), eval('samtools version | head -n 1 | sed "s/samtools //"'), topic: versions
+	tuple val(task.process), val('htslib'), eval('bgzip --version | head -n 1 | sed "s/.* //"'), topic: versions
 
 	script:
 
-	// Always map fastqs
-	if (meta.format == 'fastq')
-		"""
-		
-		echo ${input_files[0]}
-		echo ${input_files[1]}
-		echo ${input_files[2]}
-		echo ${input_files[3]}
-		echo ${reference_fasta}
-		
-		"""
-	
-	// Map bams if specified in metadata
-	else if (meta.format == 'bam' && mapping == true)
-		"""
+	def args = task.ext.args ?: '-C'
+	def args2 = task.ext.args2
+	"""
 
-		echo ${input_files[0]}
-		echo ${input_files[1]}
-		echo ${input_files[2]}
-		echo ${input_files[3]}
-		echo ${reference_fasta}
+	bwa-mem2 mem ${args} -t ${task.cpus} ${reference_fasta} ${reads} \\
+		| samtools sort --threads ${task.cpus} ${args2} - \\
+		| samtools view --threads ${task.cpus} -T ${reference_fasta} -o ${meta.id}.cram
 
-		"""
+	# TODO: unsure why this line needed (creates empty index file), kept temporarily
+	touch ${meta.id}.cram.crai
 
-	// Map crams if specified in metadata
-	else if (meta.format == 'cram' && mapping == true)
-		"""
-
-		echo "do nothing yet"
-
-		"""
+	"""
 
 }

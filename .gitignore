@@ -1,12 +1,21 @@
-# General
+# Output files & directories
+
 .nextflow*
-output
-work
+work/
+results/
+report-*
 trace-*
+.DS_Store
+*.pyc
+null/
+
+# Pixi
+
 .pixi
 *.egg-info
 
-# Data inputs
+# Input data + exceptions
+
 data/genome/*
 !data/genome/README.md
 data/reads/*
@@ -14,4 +23,3 @@ data/reads/*
 
 # Local
 TEMP_STORE/*
-cleanup-selective.sh

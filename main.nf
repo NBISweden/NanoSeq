@@ -50,7 +50,7 @@ Changes made to the original codebase are summarised in the CHANGES.md file, and
 		package_versions {
 			path 'package_versions'
 			mode 'copy'
-			overwrite true
+			overwrite false
 		}
 
 	}
