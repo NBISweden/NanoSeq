@@ -11,10 +11,11 @@ Main workflow
 
 // Import modules
 
-	include { BWA_MEM2_INDEX } from '../modules/bwa-index.nf'
-	include { SAMTOOLS_INDEX } from '../modules/samtools-index.nf'
+	include { INDEX_REFERENCE } from '../modules/index.nf'
 	include { ADD_NANOSEQ_FASTQ_TAGS } from '../modules/add-nanoseq-fastq-tags.nf'
 	include { BWA_MEM2_MAP } from '../modules/bwa-map.nf'
+	include { REMAP_SPLIT } from '../modules/remap-split.nf'
+	include { BWA_MEM2_REMAP } from '../modules/bwa-remap.nf'
 
 // Main workflow
 
@@ -27,23 +28,74 @@ Main workflow
 
 		main:
 
-			// Create BWA index files if they don't exist
+			// Branch samplesheet channel according to analysis flow
 
-				BWA_MEM2_INDEX(ch_reference)
+				ch_samplesheet
+					.map { meta, files ->
+						return [meta, files]
+					}
+					.branch {
+						fastq: { meta, files -> meta.format == 'fastq' }
+						bam_map: { meta, files -> meta.format == 'bam' && meta.mapping }
+						bam_nomap: { meta, files -> meta.format == 'bam' && !meta.mapping }
+						cram_map: { meta, files -> meta.format == 'cram' && meta.mapping }
+						cram_nomap: { meta, files -> meta.format == 'cram' && !meta.mapping }
+					}
+					.set { ch_samplesheet }
 
-			// Create samtools index if it doesn't exist
+			// Create BWA and samtools index files if they don't exist
 
-				SAMTOOLS_INDEX(ch_reference)
+				INDEX_REFERENCE(ch_reference)
 
-			// Add NanoSeq tags to FASTQ
+			// Conditional processing of inputs
 
-				ADD_NANOSEQ_FASTQ_TAGS(ch_samplesheet)
+				// FASTQ
 
-			// Map samples
+					// Multimap the FASTQ input channel to emit duplex and normal reads separately
 
-				BWA_MEM2_MAP(ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference, BWA_MEM2_INDEX.out.ch_bwa_indexes)
+						ch_samplesheet.fastq
+							.multiMap { meta, files ->
+								meta_duplex = meta.clone() // Clone metadata without editing original
+								meta_normal = meta.clone()
+								meta_duplex["type"] = "duplex" // Add type to metadata
+								meta_normal["type"] = "normal"
+								duplex: [meta_duplex, [files[0], files[1]]] // Emit read types as separate channels for parallel processing
+								normal: [meta_normal, [files[2], files[3]]]
+							}
+							.set { ch_fastqs }
 
-			//
+					// Add NanoSeq tags to FASTQ, both duplex and normal channels
+
+						ADD_NANOSEQ_FASTQ_TAGS(ch_fastqs.duplex.mix(ch_fastqs.normal))
+
+					// Map FASTQ samples
+
+						BWA_MEM2_MAP(ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
+
+
+
+
+
+
+
+				// // CRAM
+
+						// TODO: cram_map channel, has two files, no indexes, reads 0 and 1 (duplex - normal)
+						//REMAP_SPLIT(ch_samplesheet.cram_map, ch_reference)
+
+					// TAKES: cram input channel, "index_dir"
+					// DOES: REMAP_SPLIT on the above
+					// REMAP on REMAP_split out + index dir
+					// EMITS cram from REMAP
+					// INDEX dir, is jsut the path to references
+					// ch_cram
+
+
+				// BAM
+
+
+
 
 
 
