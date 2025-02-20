@@ -36,8 +36,8 @@ Main workflow
 					}
 					.branch {
 						fastq: { meta, files -> meta.format == 'fastq' }
-						bam_map: { meta, files -> meta.format == 'bam' && meta.mapping }
-						bam_nomap: { meta, files -> meta.format == 'bam' && !meta.mapping }
+						bam_map: { meta, files -> meta.format == 'bam' && meta.mapping } // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
+						bam_nomap: { meta, files -> meta.format == 'bam' && !meta.mapping } // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
 						cram_map: { meta, files -> meta.format == 'cram' && meta.mapping }
 						cram_nomap: { meta, files -> meta.format == 'cram' && !meta.mapping }
 					}
@@ -45,11 +45,11 @@ Main workflow
 
 			// Create BWA and samtools index files if they don't exist
 
-				INDEX_REFERENCE(ch_reference)
+				INDEX_REFERENCE (ch_reference)
 
 			// Conditional processing of inputs
 
-				// FASTQ
+				// FASTQ steps
 
 					// Create separate FASTQ channels of duplex and normal reads for parallel processing
 
@@ -64,33 +64,41 @@ Main workflow
 
 					// Add NanoSeq tags to FASTQ, take both duplex and normal read channels
 
-						ADD_NANOSEQ_FASTQ_TAGS(ch_fastqs.duplex.mix(ch_fastqs.normal))
+						ADD_NANOSEQ_FASTQ_TAGS (ch_fastqs.duplex.mix(ch_fastqs.normal))
 
 					// Map FASTQ samples
 
-						BWA_MEM2_MAP(ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+						BWA_MEM2_MAP (ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
+				// CRAM steps (NOTE: this includes CRAM output from FASTQ mapping, or user input with/without indexes)
+					//FIXME: possibly CRAM and BAM are actually treated the same in the original, but not explicitly stated - revisit and state if so
+
+					// User CRAM input requiring remapping (no indexes)
+
+						ch_samplesheet.cram_map
+							.multiMap { meta, files ->
+								meta_duplex = meta + [type: "duplex"]
+								meta_normal = meta + [type: "normal"]
+								duplex: [meta_duplex, [files[0]]]
+								normal: [meta_normal, [files[1]]]
+							}
+							.set { ch_cram_remap }
+
+					// Remap TODO: inputs are cram channel with no indexes, and genome file basically
+
+						REMAP_SPLIT (ch_cram_remap, ch_reference.collect())
+
+						BWA_MEM2_REMAP (REMAP_SPLIT.out.TODO:, ch_reference.collect())
+
+					// User CRAM input, no remapping (with indexes) TODO:
 
 
 
+					// Mark duplicates in CRAMS from both user FASTQ input, or user unindexed CRAM input
+
+						MARKDUP (BWA_MEM2_MAP.out.ch_cram.mix(BWA_MEM2_REMAP.out.ch_cram), ch_reference)
 
 
-
-
-
-				// // CRAM
-
-						// TODO: cram_map channel, has two files, no indexes, reads 0 and 1 (duplex - normal)
-						//REMAP_SPLIT(ch_samplesheet.cram_map, ch_reference)
-
-					// TAKES: cram input channel, "index_dir"
-					// DOES: REMAP_SPLIT on the above
-					// REMAP on REMAP_split out + index dir
-					// EMITS cram from REMAP
-					// INDEX dir, is jsut the path to references
-					// ch_cram
-
-
-				// BAM
 
 
 
