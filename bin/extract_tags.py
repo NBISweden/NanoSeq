@@ -166,6 +166,7 @@ class ExtractTags:
             r1.add_header(header1)
             r2.add_header(self.in2.readline())
             if r1.header != r2.header:
+                print(f"Mismatched headers:\nR1: {r1.header}\nR2: {r2.header}")
                 raise ValueError('File is not in sync')
             # sequence
             r1.add_sequence(self.in1.readline())
