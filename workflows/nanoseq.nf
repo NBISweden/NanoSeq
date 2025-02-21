@@ -34,12 +34,12 @@ Main workflow
 					.map { meta, files ->
 						return [meta, files]
 					}
-					.branch {
-						fastq: { meta, files -> meta.format == 'fastq' }
-						bam_map: { meta, files -> meta.format == 'bam' && meta.mapping } // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
-						bam_nomap: { meta, files -> meta.format == 'bam' && !meta.mapping } // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
-						cram_map: { meta, files -> meta.format == 'cram' && meta.mapping }
-						cram_nomap: { meta, files -> meta.format == 'cram' && !meta.mapping }
+					.branch { meta, files ->
+						fastq: meta.format == 'fastq'
+						bam_map: meta.format == 'bam' && meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
+						bam_nomap: meta.format == 'bam' && !meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
+						cram_map: meta.format == 'cram' && meta.mapping
+						cram_nomap: meta.format == 'cram' && !meta.mapping
 					}
 					.set { ch_samplesheet }
 
