@@ -98,7 +98,7 @@ Main workflow
 
 					// User FASTQ input to CRAM intermediate - mark duplicates //FIXME: later this probably needs to be mixed with user CRAM no index input (.mix(BWA_MEM2_REMAP.out.ch_cram))
 
-						MARK_DUPLICATES (BWA_MEM2_MAP.out.ch_cram, ch_reference)
+						MARK_DUPLICATES (BWA_MEM2_MAP.out.ch_cram, ch_reference.collect())
 
 
 

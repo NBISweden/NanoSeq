@@ -15,7 +15,8 @@ process BWA_MEM2_MAP {
 	path indexes
 
 	output:
-	tuple val(meta), path("${meta.id}_${meta.type}.cram"), path("${meta.id}_${meta.type}.cram.crai"), emit: ch_cram // TODO: revisit this inherited placeholder crai file
+	tuple val(meta), path("${meta.id}_${meta.type}.cram"), emit: ch_cram
+		// TODO: original script output an empty crai index. Removed for now, to find where it becomes needed. If not needed, done. If needed, create properly. 
 	tuple val(task.process), val('bwa-mem2'), eval('bwa-mem2 version 2>/dev/null'), topic: versions
 	tuple val(task.process), val('samtools'), eval('samtools version | head -n 1 | sed "s/samtools //"'), topic: versions
 	tuple val(task.process), val('htslib'), eval('bgzip --version | head -n 1 | sed "s/.* //"'), topic: versions
@@ -29,9 +30,6 @@ process BWA_MEM2_MAP {
 	bwa-mem2 mem ${args} -t ${task.cpus} ${reference_fasta} ${reads} \\
 		| samtools sort --threads ${task.cpus} ${args2} - \\
 		| samtools view --threads ${task.cpus} -T ${reference_fasta} -o ${meta.id}_${meta.type}.cram
-
-	# TODO: unsure why this line needed (creates empty index file), kept temporarily
-	touch ${meta.id}_${meta.type}.cram.crai
 
 	"""
 
