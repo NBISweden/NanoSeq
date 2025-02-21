@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/opt/conda/bin/perl
 
 ##########LICENCE##########
 # PCAP - NGS reference implementations and helper code for the ICGC/TCGA Pan-Cancer Analysis Project
