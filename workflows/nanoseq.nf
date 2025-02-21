@@ -14,7 +14,6 @@ Main workflow
 	include { INDEX_REFERENCE } from '../modules/index.nf'
 	include { ADD_NANOSEQ_FASTQ_TAGS } from '../modules/add-nanoseq-fastq-tags.nf'
 	include { BWA_MEM2_MAP } from '../modules/bwa-map.nf'
-	include { REMAP_SPLIT } from '../modules/remap-split.nf'
 	include { BWA_MEM2_REMAP } from '../modules/bwa-remap.nf'
 
 // Main workflow
@@ -84,11 +83,9 @@ Main workflow
 							}
 							.set { ch_cram_remap }
 
-					// Remap TODO: inputs are cram channel with no indexes, and genome file basically
+					// CRAM remapping
 
-						REMAP_SPLIT (ch_cram_remap, ch_reference.collect())
-
-						BWA_MEM2_REMAP (REMAP_SPLIT.out.TODO:, ch_reference.collect())
+						BWA_MEM2_REMAP (ch_cram_remap.duplex.mix(ch_cram_remap.normal), ch_reference.collect())
 
 					// User CRAM input, no remapping (with indexes) TODO:
 
