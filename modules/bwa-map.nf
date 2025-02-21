@@ -12,7 +12,7 @@ process BWA_MEM2_MAP {
 	input:
 	tuple val(meta), path(reads)
 	path reference_fasta
-	path bwa_indexes
+	path indexes
 
 	output:
 	tuple val(meta), path("${meta.id}_${meta.type}.cram"), path("${meta.id}_${meta.type}.cram.crai"), emit: ch_cram // TODO: revisit this inherited placeholder crai file

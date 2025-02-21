@@ -14,7 +14,9 @@ Main workflow
 	include { INDEX_REFERENCE } from '../modules/index.nf'
 	include { ADD_NANOSEQ_FASTQ_TAGS } from '../modules/add-nanoseq-fastq-tags.nf'
 	include { BWA_MEM2_MAP } from '../modules/bwa-map.nf'
+	include { REMAP_SPLIT } from '../modules/remap-split.nf'
 	include { BWA_MEM2_REMAP } from '../modules/bwa-remap.nf'
+	include { MARK_DUPLICATES } from '../modules/mark-duplicates.nf'
 
 // Main workflow
 
@@ -72,7 +74,7 @@ Main workflow
 				// CRAM steps (NOTE: this includes CRAM output from FASTQ mapping, or user input with/without indexes)
 					//FIXME: possibly CRAM and BAM are actually treated the same in the original, but not explicitly stated - revisit and state if so
 
-					// User CRAM input requiring remapping (no indexes)
+					// User CRAM input requiring remapping (no indexes) //FIXME: currently not supported, there are some CPAN libraries missing and we either need to refactor process behaviour with Sanger input, or ask them to update the conda libraries
 
 						ch_samplesheet.cram_map
 							.multiMap { meta, files ->
@@ -83,17 +85,20 @@ Main workflow
 							}
 							.set { ch_cram_remap }
 
-					// CRAM remapping
+					// CRAM remapping steps
 
-						BWA_MEM2_REMAP (ch_cram_remap.duplex.mix(ch_cram_remap.normal), ch_reference.collect())
+						//REMAP_SPLIT (ch_cram_remap.duplex.mix(ch_cram_remap.normal), ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect()) //FIXME: see above
+
+						//BWA_MEM2_REMAP (REMAP_SPLIT.out.TODO:, ch_reference.collect()) //FIXME: see above
 
 					// User CRAM input, no remapping (with indexes) TODO:
 
+						//ch_samplesheet.cram_nomap
+						//	.multiMap { meta, files ->
 
+					// User FASTQ input to CRAM intermediate - mark duplicates //FIXME: later this probably needs to be mixed with user CRAM no index input (.mix(BWA_MEM2_REMAP.out.ch_cram))
 
-					// Mark duplicates in CRAMS from both user FASTQ input, or user unindexed CRAM input
-
-						MARKDUP (BWA_MEM2_MAP.out.ch_cram.mix(BWA_MEM2_REMAP.out.ch_cram), ch_reference)
+						MARK_DUPLICATES (BWA_MEM2_MAP.out.ch_cram, ch_reference)
 
 
 
