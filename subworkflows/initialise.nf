@@ -128,7 +128,7 @@ workflow INITIALISE {
 					}
 					.set { ch_samplesheet }
 
-		// Parse reference genome & optional indexes (workflow creates them if missing)
+		// Parse reference genome
 
 			Channel
 				.fromPath("${params.fasta}", checkIfExists: true)
