@@ -21,7 +21,6 @@ process BWA_MEM2_MAP {
 	tuple val(task.process), val('htslib'), eval('bgzip --version | head -n 1 | sed "s/.* //"'), topic: versions
 
 	script:
-
 	def args = task.ext.args ?: '-C'
 	def args2 = task.ext.args2
 	"""
