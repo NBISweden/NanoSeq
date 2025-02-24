@@ -27,9 +27,9 @@ process BWA_MEM2_MAP {
 	def args2 = task.ext.args2
 	"""
 
-	bwa-mem2 mem ${args} -t ${task.cpus} ${reference_fasta} ${reads} \\
-		| samtools sort --threads ${task.cpus} ${args2} - \\
-		| samtools view --threads ${task.cpus} -T ${reference_fasta} -o ${meta.id}_${meta.type}.cram
+	bwa-mem2 mem ${args} -t ${task.cpus} ${reference_fasta} ${reads} | \
+		samtools sort --threads ${task.cpus} ${args2} - | \
+		samtools view --threads ${task.cpus} -T ${reference_fasta} -o ${meta.id}_${meta.type}.cram
 
 	"""
 
