@@ -14,7 +14,7 @@ process BWA_MEM2_REMAP {
 	path reference_fasta
 
 	output:
-	tuple val(meta), path("sort/${meta.name}.cram"), path("sort/${meta.name}.cram.crai"), emit: cram
+	tuple val(meta), path("sort/${meta.name}.cram"), path("sort/${meta.name}.cram.crai"), emit: cram //TODO: remove this crai
 	path  "versions.yml", emit: versions
 
 	script:
