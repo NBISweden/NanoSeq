@@ -17,6 +17,7 @@ Main workflow
 	include { REMAP_SPLIT } from '../modules/remap-split.nf'
 	include { BWA_MEM2_REMAP } from '../modules/bwa-remap.nf'
 	include { MARK_DUPLICATES } from '../modules/mark-duplicates.nf'
+	include { ADD_READ_BUNDLES } from '../modules/add-read-bundles.nf'
 
 // Main workflow
 
@@ -37,8 +38,8 @@ Main workflow
 					}
 					.branch { meta, files ->
 						fastq: meta.format == 'fastq'
-						bam_map: meta.format == 'bam' && meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
-						bam_nomap: meta.format == 'bam' && !meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
+						//bam_map: meta.format == 'bam' && meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
+						//bam_nomap: meta.format == 'bam' && !meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
 						cram_map: meta.format == 'cram' && meta.mapping
 						cram_nomap: meta.format == 'cram' && !meta.mapping
 					}
@@ -71,7 +72,7 @@ Main workflow
 
 						BWA_MEM2_MAP (ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
-				// CRAM steps (NOTE: this includes CRAM output from FASTQ mapping, or user input with/without indexes)
+				// CRAM steps (NOTE: this includes CRAM output from FASTQ mapping, and CRAM user input with or without indexes)
 					//FIXME: possibly CRAM and BAM are actually treated the same in the original, but not explicitly stated - revisit and state if so
 
 					// User CRAM input requiring remapping (no indexes) //FIXME: currently not supported, there are some CPAN libraries missing and we either need to refactor process behaviour with Sanger input, or ask them to update the conda libraries
@@ -91,17 +92,25 @@ Main workflow
 
 						//BWA_MEM2_REMAP (REMAP_SPLIT.out.TODO:, ch_reference.collect()) //FIXME: see above
 
-					// User CRAM input, no remapping (with indexes) TODO:
-
-						//ch_samplesheet.cram_nomap
-						//	.multiMap { meta, files ->
 
 					// User FASTQ input to CRAM intermediate - mark duplicates //FIXME: later this probably needs to be mixed with user CRAM no index input (.mix(BWA_MEM2_REMAP.out.ch_cram))
 
 						MARK_DUPLICATES (BWA_MEM2_MAP.out.ch_cram, ch_reference.collect())
 
+					// CRAM input with indexes joins here, same as FASTQ input MARK_DUPLICATES.out.ch_cram
 
+						ch_samplesheet.cram_nomap
+							.multiMap {meta, files ->
+								meta_duplex = meta + [type: "duplex"]
+								meta_normal = meta + [type: "normal"]
+								duplex: [meta_duplex, [files[0], files[1]]]
+								normal: [meta_normal, [files[2], files[3]]]
+							}
+							.set { ch_cram_no_map }
 
+					// Add read bundles
+
+						ADD_READ_BUNDLES (MARK_DUPLICATES.out.ch_cram.mix(ch_cram_no_map.duplex.mix(ch_cram_no_map.normal)), ch_reference.collect())
 
 
 
