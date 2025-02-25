@@ -22,10 +22,9 @@ process ADD_NANOSEQ_FASTQ_TAGS {
 
 	# Get read length
 
-		length=`zcat ${reads[0]} | head -2 | tail -1 | awk '{ print length }'`
+		length=\$(zcat "${reads[0]}" | head -2 | tail -1 | awk '{ print length }')
 
 	# Extract tags
-
 		extract_tags.py -a ${reads[0]} -b ${reads[1]} -c ${meta.id}_${meta.type}_R1.fastq.gz -d ${meta.id}_${meta.type}_R2.fastq.gz -m ${params.fastq_tags_m} -s ${params.fastq_tags_s} -l \$length
 
 	"""
