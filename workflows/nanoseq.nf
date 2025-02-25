@@ -33,17 +33,12 @@ Main workflow
 			// Branch samplesheet channel according to analysis flow
 
 				ch_samplesheet
-					.map { meta, files ->
-						return [meta, files]
-					}
 					.branch { meta, files ->
 						fastq: meta.format == 'fastq'
-						//bam_map: meta.format == 'bam' && meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
-						//bam_nomap: meta.format == 'bam' && !meta.mapping // TODO: revisit if channel is needed, or can be combined with cram + renamed with both
-						cram_map: meta.format == 'cram' && meta.mapping
-						cram_nomap: meta.format == 'cram' && !meta.mapping
+						cram_bam_map: (meta.format == 'cram' || meta.format == 'bam') && meta.mapping
+						cram_bam_nomap: (meta.format == 'cram' || meta.format == 'bam') && !meta.mapping
 					}
-					.set { ch_samplesheet }
+					.set { ch_branches }
 
 			// Create BWA and samtools index files if they don't exist
 
