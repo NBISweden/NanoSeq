@@ -2,7 +2,7 @@ process ADD_READ_BUNDLES {
 
 	// Directives
 
-	debug true
+	debug false
 	tag "${meta.id}_${meta.type}"
 	label 'process_single'
 	container 'docker://cormackinsella/nanoseq-src:latest'
