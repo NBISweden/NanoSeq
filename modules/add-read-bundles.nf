@@ -14,24 +14,28 @@ process ADD_READ_BUNDLES {
 	path reference_fasta
 
 	output:
-	//tuple val(meta), path("out/${meta.name}.cram"), path("out/${meta.name}.cram.crai"), emit: cram
-	//tuple val(task.process), val('samtools'), eval('samtools version | head -n 1 | sed "s/samtools //"'), topic: versions
+	tuple val(meta), path("${meta.id}_${meta.type}.*rb.cram*"), emit: ch_cram
+	tuple val(task.process), val('samtools'), eval('samtools version | head -n 1 | sed "s/samtools //"'), topic: versions
 
 	script:
 	"""
 
-	mkdir -p out
-	NLINES=`samtools view $cram | head -1 | grep rb: | grep rc: | grep mb: | grep mc: | wc -l` || true
-	## *MODIFIED* (ao7): fixed numeric comparison operator
-	## if [ \$NLINES != 0 ]; then
-	if [ \$NLINES -ne 0 ]; then
-	##
-		bamaddreadbundles -I $cram -O ./out/${meta.name}.cram
-		samtools index ./out/${meta.name}.cram
-	else
-	ln -s ../$cram ./out/${meta.name}.cram
-	ln -s ../$index ./out/${meta.name}.cram.crai
+	NLINES=`samtools view ${cram[0]} | head -1 | grep rb: | grep rc: | grep mb: | grep mc: | wc -l` || true
+
+	if [ \$NLINES -ne 0 ]
+
+		then
+
+			bamaddreadbundles -I *.cram -O ${meta.id}_${meta.type}.rb.cram
+			samtools index ${meta.id}_${meta.type}.rb.cram
+
+		else
+
+			cp ${cram[0]}  ${meta.id}_${meta.type}.no_rb.cram
+			cp ${cram[1]}  ${meta.id}_${meta.type}.no_rb.cram.crai
+
 	fi
+
 	"""
 
 }
