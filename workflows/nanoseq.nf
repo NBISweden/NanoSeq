@@ -50,10 +50,10 @@ Main workflow
 
 					// Create separate FASTQ channels of duplex and normal reads for parallel processing
 
-						ch_samplesheet.fastq
+						ch_branches.fastq
 							.multiMap { meta, files ->
-								meta_duplex = meta + [type: "duplex"]
-								meta_normal = meta + [type: "normal"]
+								def meta_duplex = meta + [type: "duplex"]
+								def meta_normal = meta + [type: "normal"]
 								duplex: [meta_duplex, [files[0], files[1]]]
 								normal: [meta_normal, [files[2], files[3]]]
 							}
