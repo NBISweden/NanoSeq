@@ -89,7 +89,7 @@ workflow INITIALISE {
 							]
 							return [meta, files]
 
-						// BAM (if remapping is required, don't add indexes to the map, keep value position consistent)
+						// BAM (if remapping is required, no indexes)
 						} else if (meta.format == 'bam') {
 							if (meta.mapping) {
 								def files = [
@@ -100,14 +100,14 @@ workflow INITIALISE {
 							} else {
 								def files = [
 									file(row.duplex_1, checkIfExists: true),
-									file(row.normal_1, checkIfExists: true),
 									row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required."),
+									file(row.normal_1, checkIfExists: true),
 									row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required.")
 								]
 								return [meta, files]
 							}
 
-						// CRAM (if remapping is required, don't add indexes to the map, keep value position consistent)
+						// CRAM (if remapping is required, no indexes)
 						} else if (meta.format == 'cram') {
 							if (meta.mapping) {
 								def files = [
@@ -118,8 +118,8 @@ workflow INITIALISE {
 							} else {
 								def files = [
 									file(row.duplex_1, checkIfExists: true),
-									file(row.normal_1, checkIfExists: true),
 									row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required."),
+									file(row.normal_1, checkIfExists: true),
 									row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required.")
 								]
 								return [meta, files]
