@@ -1,4 +1,101 @@
-# CHANGES
+# Changelog
+
+## [Unreleased]
+
+### Planned
+
+- add support for unindexed bam/cram files
+
+___
+
+<!-- Release history -->
+
+
+## [4.0.0-NBIS] - TODO: DATE
+
+### Dependencies
+
+- pixi
+
+### Changed or removed
+
+#### Installation & dependencies
+
+- Original repository provided two main installation options: either a large docker image containing all dependencies, or a manual installation option, both have been removed
+- Base dependencies are now handled by `pixi` (see `pixi.toml`). Most importantly, `pixi` specifies the Nextflow and Apptainer versions, and fixes their dependencies via the provided `pixi.lock` file
+- After cloning the repo, installation is done by:
+
+```
+curl -fsSL https://pixi.sh/install.sh | bash
+
+pixi install
+```
+
+- Further dependencies within processes are now handled by container images, pulled on the fly by Nextflow & Apptainer
+- Where possible, the Seqera containers service was used to build these (i.e., when all dependencies were available via conda channels)
+
+#### Src
+
+- Removed `src`
+- The C/C++ source code is now precompiled in a publically hosted docker image: [GitHub](https://github.com/NBISweden/NanoSeq-src-Docker), [DockerHub](https://hub.docker.com/repository/docker/cormackinsella/nanoseq-src/general), and pulled on the fly
+
+#### Tool versions
+
+- Tool versions have been updated in many cases, including in the `src` Docker image
+
+#### Samplesheet input
+
+- The original workflow asked users to edit the column headers of their samplesheet depending on whether `FASTQ`, `CRAM`, or `BAM` was provided as input. This prevented mixing of input formats, and added potential for user error
+- Refactored to a fixed samplesheet layout, and added two columns (`input_format`, `normal_method`), in which users state the file type provided per sample, and the method used for sequencing the matched normal sample (duplex or standard)
+- The initialisation subworkflow now loads the samplesheet and validates essential information (unique sample ids, valid input formats, and matched normal sequencing method). If passing checks, file paths are added according to the input type. This is emitted as a channel to the main workflow, where it is branched into individual channels for each input type. The existing logic that allowed parallel mapping for normal and duplex read-pairs has been maintained via a equivalent multimap operation
+- Users can now mix input types in a single run
+
+#### Support for unindexed bam/cram files
+
+- Removed support for unindexed bam/cram file inputs as these processes relied on internal Sanger perl libraries and scripts
+
+#### Reference genome & indexes
+
+- Added support for additional FASTA extensions
+- Removed hard-coded genome file name, accepts any correctly formatted FASTA file with any prefix, with a rational default
+- The original workflow required indexing of the reference genome prior to the workflow
+- This has been replaced with a process that executes only if it does not find the indexes, generating them. The process stores the indexes alongside the input FASTA for subsequent runs
+
+#### Output publication
+
+- Outputs are now published via the newer Nextflow output feature
+
+#### Package version reporting
+
+- Package version reporting within process script blocks was replaced with a topic channel, published in the same way as other outputs
+
+#### Overall layout
+
+- Repository layout has been simplified and modularised
+- Entry workflow now defined in `main.nf`
+- Main workflow now defined in `workflows/nanoseq.nf`
+- Initialisation subworkflow defined in `subworkflows/initialise.nf`
+- Processes are now one per file and found in `modules`
+- Other named workflows have been removed and reimplemented as modules/processes
+- Assorted scripts are now found in `bin`
+- Basic nextflow config now found in `nextflow.config`
+- Parameters are now exclusively defined in `conf/parameters.config`, these have been reorganised and annotated
+- Additional profiles have been defined, and all are now found in `conf/profiles.config`
+- any `ext.arg` variables are now found in `conf/modules.config`
+- Removed redundant configs/deprecated DSL statements
+
+#### Hard coding/system dependency
+
+- Where found, hard coding has been removed and replaced with Nextflow variables or parameters
+- Where system paths were used, these have been replaced to be system agnostic
+
+
+
+
+
+<!-- Pre-fork release history -->
+
+# Releases below are from [fa8sanger/NanoSeq](https://github.com/fa8sanger/NanoSeq), ending at commit 31e34bf
 
 ## 3.5.7
 * Update to discarded variant script to allow sorting of vcf discarded variant file
@@ -127,4 +224,3 @@
 * Updated to htslib 1.11
 * Added licencing information
 * Added error checks when reading
-

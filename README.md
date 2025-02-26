@@ -1,40 +1,67 @@
+[![Pixi Badge](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
+![Nextflow](https://img.shields.io/badge/Nextflow->=v24.10.4-brightgreen)
+
 # NanoSeq
-[![CircleCI][circleci-status]][circleci-pipeline]
-[![Quay Badge][quay-status]][quay-repo]
+
+>[!NOTE]
+>`NBISweden/NanoSeq` is a detached and modified fork of commit 31e34bf on [this repository](https://github.com/fa8sanger/NanoSeq), itself a fork of the [original NanoSeq project](https://github.com/cancerit/NanoSeq)<br><br>
+>The original workflow codebase was released under the GNU AFFERO GENERAL PUBLIC LICENSE, as is this modified version<br><br>
+>Credit for the original work goes solely to the NanoSeq authors<br><br>
+>Modifications are summarised in the `CHANGELOG.md` file<br><br>
+>Versioning follows the original NanoSeq project, starting at major release 4, with the NBIS suffix to distinguish from the original project (e.g.: 4.0.0-NBIS)
+
+## Description
+
+>[!WARN]
+> `NBISweden/NanoSeq` is not to be confused with `nf-core/nanoseq`, an unrelated workflow for Nanopore data analysis
+
+TODO: insert description
+
+## Quick start
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/NBISweden/NanoSeq)
+
+### Local or HPC installation
+
+1. [Install Pixi](https://pixi.sh/latest/)
+2. Clone the Workflow repository: `git clone https://github.com/NBISweden/NanoSeq.git`
+3. Run `pixi install`
+
+
+
+
+___
+
+#### TODO: provide new instructions, update remainder
+
+
+
 
 Nanorate sequencing (NanoSeq) is a DNA library preparation and sequencing protocol based on Duplex Sequencing ([Schmitt et al, 2012](https://doi.org/10.1073/pnas.1208715109)) and BotSeqS ([Hoang et al, 2016](https://doi.org/10.1073/pnas.1607794113)). NanoSeq allows calling mutations with single molecule resolution and extremely low error rates ([Abascal et al, 2021](https://doi.org/10.1038/s41586-021-03477-4)). The pipeline and code in this repository cover the preprocessing of NanoSeq sequencing data, the assessment of data quality and efficiency, and the calling of mutations (substitutions and indels) and the estimation of mutation burdens and substitution profiles.
 
 The wet-lab protocol is described in the original publication ([Abascal et al, 2021](https://doi.org/10.1038/s41586-021-03477-4)) and on ProtocolExchange ([Lensing et al, 2021](https://protocolexchange.researchsquare.com/article/pex-1298/v1)).
 
-## Nextflow
 
-The simplest way of executing NanoSeq analyses is using the provided Nextflow ( NanoSeq_main.nf ) and its modules. It carries out all the required pre-processing of input files and carries out the NanoSeq analysis itself. The provided configuration file  nextflow.config been setup for usage in an LSF cluster with singularity. Other environments can be accomodated by creating a similar section (see [ Nextflow docs ](https://www.nextflow.io/docs/latest/config.html) ) in the config file. Most processes contain error recovery clauses that might also require modifications for other executor environments.
+There are three possible file inputs for the workflow: paired-end FASTQ, and either BAM or CRAM and BAM. For the latter two, it is assumed all prior preprocessing has been done, and indexes must be provided.
 
-There are two possible file inputs for the workflow: FASTQs and BAM files. These are passed as arguments to the workflow in a samplesheet in csv format so that it is possible to do multi sample processing with one Nextflow.
 
 - FASTQ input
 
    This option will carry all the pre-processing of sequencing data and the NanoSeq analysis. Both duplex and normal FASTQs are treated as NanoSeq libraries.
    
-   Sample sheet format
+   Sample sheet format FIXME:
 ```
 id,d_fastq1,d_fastq2,n_fastq1,n_fastq2
 experiment1,1_duplex_R1.fastq.gz,1_duplex_R2.fastq.gz,1_normal_R1.fastq.gz,1_normal_R2.fastq.gz
 experiment2,2_duplex_R1.fastq.gz,2_duplex_R2.fastq.gz,2_normal_R1.fastq.gz,2_normal_R2.fastq.gz
 ...
+
 ```
 
-- BAM input
+- BAM/CRAM input
 
-   BAM files can be of two types: ones that require re-mapping but already have the correct tags, or BAMs that are already correctly pre-processed and mapped. The type of BAM is specified with the --remap parameter (default true).
+   Files must be already correctly pre-processed and mapped
 
-   Sample sheet format
-```
-id,d_bam,n_bam
-experiment1,1_duplex.bam,1_normal.bam
-experiment2,2_duplex.bam,2_normal.bam
-...
-```
 
 A typical execution of the workflow with the NanoSeq_main.nf and module directory in the present working directory would look as this:
 
@@ -54,23 +81,9 @@ The reference directory must contain the reference itself (genome.fa), the genom
 
 ## Software details for manual execution
 
-### Dependencies
 
-Execution of the scripts from this repository requires that these dependencies are on PATH :
 
-* samtools
-* bcftools
-* R (>=3.5 )
-* biobambam
-* bwa
 
-### Installation
-
-```
-./setup.sh path_to_install                          #install code from this repository
-export PATH=$PATH:path_to_install/bin
-Rscript ./build/manualInstall.R <R libraries path>  #install all the required R libraries
-```
 
 ### Preprocessing of the sequencing data
 
