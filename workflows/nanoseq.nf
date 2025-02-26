@@ -86,7 +86,18 @@ Main workflow
 
 					// Deduplicate
 
-						//DEDUPLICATE
+						DEDUPLICATE (ADD_READ_BUNDLES.out.ch_cram, ch_reference.collect())
+
+
+
+
+
+
+
+
+
+
+
 
 			// Report package versions
 

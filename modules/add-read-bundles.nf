@@ -20,7 +20,7 @@ process ADD_READ_BUNDLES {
 	script:
 	"""
 
-	NLINES=`samtools view ${cram[0]} | head -1 | grep rb: | grep rc: | grep mb: | grep mc: | wc -l` || true
+	NLINES=\$(samtools view ${cram[0]} | head -1 | grep rb: | grep rc: | grep mb: | grep mc: | wc -l) || true
 
 	if [ \$NLINES -ne 0 ]
 
