@@ -52,7 +52,6 @@ workflow INITIALISE {
 						def meta = [
 							id: row.id,
 							format: row.input_format.toLowerCase(),
-							mapping:row.mapping_required.toLowerCase(),
 							normalMethod: row.normal_method.toLowerCase()
 						]
 
@@ -65,12 +64,6 @@ workflow INITIALISE {
 						if (!['fastq', 'bam', 'cram'].contains(meta.format)) {
 							error ("ERROR: Sample '${meta.id}' has an invalid input format '${meta.format}'. Please only supply 'fastq', 'bam', or 'cram' (case insensitive).")
 						}
-
-						// Check that mapping_required is true or false, convert to boolean
-						if (!['true', 'false'].contains(meta.mapping)) {
-							error ("ERROR: Sample '${meta.id}' has an invalid mapping_required value '${meta.mapping}'. Please only supply 'true' or 'false' (case insensitive).")
-						}
-						meta.mapping = meta.mapping.toBoolean()
 
 						// Check that matched normal sequencing method is either duplex or standard
 						if (!['duplex', 'standard'].contains(meta.normalMethod)) {
@@ -89,41 +82,25 @@ workflow INITIALISE {
 							]
 							return [meta, files]
 
-						// BAM (if remapping is required, no indexes)
+						// BAM with indexes
 						} else if (meta.format == 'bam') {
-							if (meta.mapping) {
-								def files = [
-									file(row.duplex_1, checkIfExists: true),
-									file(row.normal_1, checkIfExists: true)
-								]
-								return [meta, files]
-							} else {
-								def files = [
-									file(row.duplex_1, checkIfExists: true),
-									row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required."),
-									file(row.normal_1, checkIfExists: true),
-									row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required.")
-								]
-								return [meta, files]
-							}
+							def files = [
+								file(row.duplex_1, checkIfExists: true),
+								row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file."),
+								file(row.normal_1, checkIfExists: true),
+								row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file.")
+							]
+							return [meta, files]
 
-						// CRAM (if remapping is required, no indexes)
+						// CRAM with indexes
 						} else if (meta.format == 'cram') {
-							if (meta.mapping) {
-								def files = [
-									file(row.duplex_1, checkIfExists: true),
-									file(row.normal_1, checkIfExists: true)
-								]
-								return [meta, files]
-							} else {
-								def files = [
-									file(row.duplex_1, checkIfExists: true),
-									row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required."),
-									file(row.normal_1, checkIfExists: true),
-									row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file when mapping is not required.")
-								]
-								return [meta, files]
-							}
+							def files = [
+								file(row.duplex_1, checkIfExists: true),
+								row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file."),
+								file(row.normal_1, checkIfExists: true),
+								row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file.")
+							]
+							return [meta, files]
 						}
 					}
 					.set { ch_samplesheet }
