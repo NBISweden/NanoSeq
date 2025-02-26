@@ -11,7 +11,7 @@ ___
 <!-- Release history -->
 
 
-## [4.0.0-NBIS] - TODO: DATE
+## [1.0.0-NBIS] - TODO: DATE
 
 ### Dependencies
 
@@ -33,6 +33,7 @@ pixi install
 
 - Further dependencies within processes are now handled by container images, pulled on the fly by Nextflow & Apptainer
 - Where possible, the Seqera containers service was used to build these (i.e., when all dependencies were available via conda channels)
+- A gitpod.yml is now provided for small scale testing in a cloud development environment
 
 #### Src
 

@@ -4,16 +4,16 @@
 # NanoSeq
 
 >[!NOTE]
->`NBISweden/NanoSeq` is a detached and modified fork of commit 31e34bf on [this repository](https://github.com/fa8sanger/NanoSeq), itself a fork of the [original NanoSeq project](https://github.com/cancerit/NanoSeq)<br><br>
+>`NBISweden/NanoSeq` was detached from a fork of `cancerit/NanoSeq` ([commit 31e34bf](https://github.com/fa8sanger/NanoSeq/tree/31e34bf5dc30165e2ae28c027f6aead3a8970410)), itself a fork of the [original NanoSeq project](https://github.com/cancerit/NanoSeq)<br><br>
 >The original workflow codebase was released under the GNU AFFERO GENERAL PUBLIC LICENSE, as is this modified version<br><br>
 >Credit for the original work goes solely to the NanoSeq authors<br><br>
->Modifications are summarised in the `CHANGELOG.md` file<br><br>
->Versioning follows the original NanoSeq project, starting at major release 4, with the NBIS suffix to distinguish from the original project (e.g.: 4.0.0-NBIS)
+>Modifications are summarised in `CHANGELOG.md`<br><br>
+>To clearly separate this and the original NanoSeq project, versioning starts over from major release 1, with the NBIS suffix added (i.e.: 1.0.0-NBIS)
 
 ## Description
 
 >[!WARN]
-> `NBISweden/NanoSeq` is not to be confused with `nf-core/nanoseq`, an unrelated workflow for Nanopore data analysis
+> `NBISweden/NanoSeq` is not to be confused with `nf-core/nanoseq`, an unrelated workflow for nanopore data analysis
 
 TODO: insert description
 
