@@ -6,6 +6,9 @@ rm ./data/genome/genome.fa.*
 
 rm -rf results
 
-cd work
-
-rm -rf  !(apptainer)
+if [ -d "work" ]; then
+	cd work
+	rm -rf  !(apptainer)
+else
+  echo "Work directory does not exist."
+fi
