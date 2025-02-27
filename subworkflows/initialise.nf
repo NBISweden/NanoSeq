@@ -14,7 +14,7 @@ workflow INITIALISE {
 
 		// Warn about current issues with topic channels
 
-			println ("WARN: package versions are not currently reported for indexing modules, due to a Nextflow bug: https://github.com/nextflow-io/nextflow/issues/5785")
+			println ("WARN: package versions are not currently reported for the indexing module, due to a Nextflow bug: https://github.com/nextflow-io/nextflow/issues/5785")
 
 		// Help message
 
