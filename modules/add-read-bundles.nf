@@ -5,7 +5,7 @@ process ADD_READ_BUNDLES {
 	debug false
 	tag "${meta.id}_${meta.type}"
 	label 'process_single'
-	container 'docker://cormackinsella/nanoseq-src:latest'
+	container 'docker://ghcr.io/nbisweden/nanoseq-src:latest'
 
 	// I/O & script
 
