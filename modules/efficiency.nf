@@ -5,7 +5,7 @@ process EFFICIENCY {
 	debug true
 	tag "${meta.id}_${meta.type}"
 	label 'process_low'
-	//FIXME:container 'docker://cormackinsella/nanoseq-src:latest'
+	container 'oras://community.wave.seqera.io/library/perl:5.32.1--9e3c43247be68b3b'
 
 	input:
 	tuple val(meta), path(files)
