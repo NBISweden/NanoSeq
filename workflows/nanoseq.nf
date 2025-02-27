@@ -17,6 +17,7 @@ Main workflow
 	include { MARK_DUPLICATES } from '../modules/mark-duplicates.nf'
 	include { ADD_READ_BUNDLES } from '../modules/add-read-bundles.nf'
 	include { DEDUPLICATE } from '../modules/deduplicate.nf'
+	include { EFFICIENCY } from '../modules/efficiency.nf'
 
 // Main workflow
 
@@ -62,7 +63,7 @@ Main workflow
 
 				INDEX_REFERENCE (ch_reference)
 
-			// Conditional processing of inputs
+			// Preprocessing
 
 				// FASTQ only steps
 
@@ -89,11 +90,17 @@ Main workflow
 						DEDUPLICATE (ADD_READ_BUNDLES.out.ch_cram, ch_reference.collect())
 
 
+					// TODO: Verify BAM ID
 
+			// Efficiency calculations: note at this stage channels are joined on experiment and type (i.e. the metadata field)
 
+				// Join, return channel with meta + files in one list
 
+					ADD_READ_BUNDLES.out.ch_cram.join(DEDUPLICATE.out.ch_cram).map { meta, read_bundles, deduplicate -> [ meta, read_bundles + deduplicate ] }.set { ch_normal_efficiency }
 
+				// Run calculations
 
+					EFFICIENCY (ch_normal_efficiency, ch_reference.collect())
 
 
 
