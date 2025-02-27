@@ -122,6 +122,7 @@ Main workflow
 
 			// Emit channels for publication
 
+				ch_efficiency_tsv = EFFICIENCY.out.ch_efficiency_tsv
 				ch_versions = ch_versions
 
 	}
