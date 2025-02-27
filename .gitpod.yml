@@ -1,1 +1,1 @@
-image: cormackinsella/nf-dev:latest
+image: ghcr.io/cormackinsella/nf-development:latest
