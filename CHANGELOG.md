@@ -37,8 +37,7 @@ pixi install
 
 #### Src
 
-- Removed `src`
-- The C/C++ source code is now precompiled in a publically hosted docker image: [GitHub](https://github.com/NBISweden/NanoSeq-src-Docker), [DockerHub](https://hub.docker.com/repository/docker/cormackinsella/nanoseq-src/general), and pulled on the fly
+- The C/C++ source code is now precompiled in a publically hosted docker image: [GitHub](https://github.com/NBISweden/NanoSeq/pkgs/container/nanoseq-src), and pulled on the fly
 
 #### Tool versions
 
