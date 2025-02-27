@@ -14,7 +14,7 @@ process ADD_READ_BUNDLES {
 	path reference_fasta
 
 	output:
-	tuple val(meta), path("${meta.id}_${meta.type}.*rb.cram*"), emit: ch_cram
+	tuple val(meta), path("${meta.id}_${meta.type}.rb.cram*"), emit: ch_cram
 	tuple val(task.process), val('samtools'), eval('samtools version | head -n 1 | sed "s/samtools //"'), topic: versions
 
 	script:
@@ -31,8 +31,8 @@ process ADD_READ_BUNDLES {
 
 		else
 
-			cp ${cram[0]}  ${meta.id}_${meta.type}.no_rb.cram
-			cp ${cram[1]}  ${meta.id}_${meta.type}.no_rb.cram.crai
+			cp ${cram[0]}  ${meta.id}_${meta.type}.rb.cram
+			cp ${cram[1]}  ${meta.id}_${meta.type}.rb.cram.crai
 
 	fi
 
