@@ -1,0 +1,2 @@
+id,input_format,normal_method,duplex_1,duplex_2,normal_1,normal_2
+apis,fastq,duplex,./data/reads/P31402_1002_S664_L008_R1_001.toy_NC_037638.1_15000000-15100000.fastq.gz,./data/reads/P31402_1002_S664_L008_R2_001.toy_NC_037638.1_15000000-15100000.fastq.gz,./data/reads/P31402_1008_S670_L008_R1_001.toy_NC_037638.1_15000000-15100000.fastq.gz,./data/reads/P31402_1008_S670_L008_R2_001.toy_NC_037638.1_15000000-15100000.fastq.gz
