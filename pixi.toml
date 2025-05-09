@@ -11,7 +11,8 @@ linux="3.10"
 
 [tasks]
 dag = { cmd = "nextflow main.nf -preview -with-dag flowchart.png" }
-test = { cmd = "nextflow main.nf -profile standard,apptainer --samplesheet data/samplesheet.csv --fasta data/genome/genome.fa" }
+fakeTest = { cmd = "nextflow main.nf -profile standard,apptainer --samplesheet data/samplesheet_fake_data_mixed_inputs.csv --fasta data/genome/genome.fa" }
+test = { cmd = "nextflow main.nf -profile standard,apptainer --samplesheet data/samplesheet_actual_data_fastq_only.csv --fasta data/genome/NC_037638.1_subset.fa" }
 
 [dependencies]
 nextflow=">=24.10.4"
