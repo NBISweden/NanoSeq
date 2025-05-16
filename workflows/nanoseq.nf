@@ -100,7 +100,7 @@ Main workflow
 
 				// Run calculations
 
-					EFFICIENCY (ch_normal_efficiency, ch_reference.collect())
+					EFFICIENCY (ch_normal_efficiency, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
 
 
