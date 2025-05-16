@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_VERSION=0.1 # Update this line
+IMAGE_VERSION=0.93 # Update this line
 
 IMAGE_NAME="ghcr.io/nbisweden/nanoseq-src"
 
@@ -22,3 +22,14 @@ IMAGE_NAME="ghcr.io/nbisweden/nanoseq-src"
  		echo "Error pushing image, exited script"
  		exit 1
  	}
+
+######################
+
+# Debug build
+
+# Build images
+
+	# docker build -t $IMAGE_NAME:$IMAGE_VERSION -t $IMAGE_NAME:latest . > build.log 2>&1 || {
+	# 	echo "Error building image, exited script"
+	# 	exit 1
+	# }
