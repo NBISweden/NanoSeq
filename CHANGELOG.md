@@ -4,62 +4,49 @@
 
 ### Planned
 
-- add support for unindexed bam/cram files
-
-___
 
 <!-- Release history -->
 
 
 ## [1.0.0-NBIS] - TODO: DATE
 
-### Dependencies
+### Base dependencies
 
-- pixi
+- `pixi` is now the only dependency for users to install. `pixi` handles further basic dependencies, i.e. `Nextflow` and `Apptainer` (+ their dependencies). `Apptainer` handles module dependencies via container images
 
 ### Changed or removed
 
 #### Installation & dependencies
 
-- Original repository provided two main installation options: either a large docker image containing all dependencies, or a manual installation option, both have been removed
-- Base dependencies are now handled by `pixi` (see `pixi.toml`). Most importantly, `pixi` specifies the Nextflow and Apptainer versions, and fixes their dependencies via the provided `pixi.lock` file
-- After cloning the repo, installation is done by:
-
-```
-curl -fsSL https://pixi.sh/install.sh | bash
-
-pixi install
-```
-
+- The original repository provided two main installation options: either a large docker image containing all dependencies, or a manual installation option to emulate the same set up, both have been changed/removed
+- Base dependencies are now handled by `pixi` (see `pixi.toml` and `pixi.lock` for a detailed manifest of dependency versions).
+- After cloning the repo, installation is done running: `curl -fsSL https://pixi.sh/install.sh | bash; pixi install`
 - Further dependencies within processes are now handled by container images, pulled on the fly by Nextflow & Apptainer
 - Where possible, the Seqera containers service was used to build these (i.e., when all dependencies were available via conda channels)
-- A gitpod.yml is now provided for small scale testing in a cloud development environment
-
-#### Src
-
-- The C/C++ source code is now precompiled in a publically hosted docker image: [GitHub](https://github.com/NBISweden/NanoSeq/pkgs/container/nanoseq-src), and pulled on the fly
+- For some processes, a more complex set of dependencies were required (e.g. custom C code, R, perl, scripts that called on others of a different type)
+- Here, a publically hosted docker image: [GitHub](https://github.com/NBISweden/NanoSeq/pkgs/container/nanoseq-src) has been created to cover the required tools, which is pulled by Apptainer during execution
+- A devcontainer.json file is provided for small scale testing in a cloud development environment
 
 #### Tool versions
 
-- Tool versions have been updated in many cases, including in the `src` Docker image
+- Tool versions have been updated in many cases
 
 #### Samplesheet input
 
 - The original workflow asked users to edit the column headers of their samplesheet depending on whether `FASTQ`, `CRAM`, or `BAM` was provided as input. This prevented mixing of input formats, and added potential for user error
 - Refactored to a fixed samplesheet layout, and added two columns (`input_format`, `normal_method`), in which users state the file type provided per sample, and the method used for sequencing the matched normal sample (duplex or standard)
-- The initialisation subworkflow now loads the samplesheet and validates essential information (unique sample ids, valid input formats, and matched normal sequencing method). If passing checks, file paths are added according to the input type. This is emitted as a channel to the main workflow, where it is branched into individual channels for each input type. The existing logic that allowed parallel mapping for normal and duplex read-pairs has been maintained via a equivalent multimap operation
+- The initialisation subworkflow now loads the samplesheet and validates essential information (unique sample ids, valid input formats, and matched normal sequencing method). If passing checks, file paths are added according to the input type. This is emitted as a channel to the main workflow, where it is branched into individual channels for each input type. The existing logic that allowed parallel mapping for normal and duplex read-pairs has been maintained via an equivalent multimap operation
 - Users can now mix input types in a single run
 
 #### Support for unindexed bam/cram files
 
-- Removed support for unindexed bam/cram file inputs as these processes relied on internal Sanger perl libraries and scripts
+- Removed support for unindexed bam/cram file inputs as these processes seem to rely on internal Sanger perl libraries and scripts
 
 #### Reference genome & indexes
 
-- Added support for additional FASTA extensions
-- Removed hard-coded genome file name, accepts any correctly formatted FASTA file with any prefix, with a rational default
-- The original workflow required indexing of the reference genome prior to the workflow
-- This has been replaced with a process that executes only if it does not find the indexes, generating them. The process stores the indexes alongside the input FASTA for subsequent runs
+- Added support for other FASTA extensions
+- Removed hard-coded genome file name, accepts any correctly formatted FASTA file with any prefix, has a rational default
+- The original workflow required indexing of the reference genome prior to the workflow, replaced with a process that executes only if it doesn't find the indexes. The process stores the indexes alongside the input FASTA for subsequent runs/shared file systems
 
 #### Output publication
 
