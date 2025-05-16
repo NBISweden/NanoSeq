@@ -5,14 +5,16 @@ process EFFICIENCY {
 	debug true
 	tag "${meta.id}_${meta.type}"
 	label 'process_low'
-	container 'oras://community.wave.seqera.io/library/perl:5.32.1--9e3c43247be68b3b'
+	container 'docker://ghcr.io/nbisweden/nanoseq-src:latest'
 
 	input:
 	tuple val(meta), path(files)
 	path reference_fasta
+	path indexes
 
 	output:
 	path "${meta.id}_${meta.type}.efficiency.tsv", emit: ch_efficiency_tsv
+	// TODO: Version report
 
 	script:
 	"""
