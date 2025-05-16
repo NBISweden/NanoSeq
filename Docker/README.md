@@ -1,9 +1,34 @@
-# Dockerfile for Nanoseq compiled code
+# Dockerfile for Nanoseq custom code
 
-- The original NanoSeq project provided a Dockerfile for building an image covering all pipeline dependencies
+- For maintainability and readability, this Dockerfile has been limited to strict dependencies of NanoSeq custom code & external tools used alongside custom code. Where possible it eliminates the need for external build scripts found in the original project.
 
-- This Dockerfile provides only the C/C++ executables and external packages used in the same processes
+- The image is available on the [GitHub Container Registry](https://github.com/NBISweden/NanoSeq/pkgs/container/nanoseq-src), and is pulled automatically by Apptainer during pipeline execution
 
-- It also updates tools to the latest versions [as of 2025-02-17]
+## Changelog
 
-- The image is available on the [GitHub Container Registry](https://github.com/NBISweden/NanoSeq/pkgs/container/nanoseq-src)
+
+### 0.93
+
+- Multi stage build to reduce image size and resolve compiler issues
+
+- NOTE: these packages were not yet added
+
+	- bcftools
+	- verifybamid
+
+### 0.92
+
+- Include R & dependencies
+- Changed gcc version for R package compilation
+
+### 0.91
+
+- Test perl & dependencies
+
+### 0.9
+
+- Overhauled test image, revised up to and including compiled c/cpp code, removing external build scripts
+
+### 0.1
+
+- Stripped down version of the original Dockerfile/Makefile/build scripts, focusing on getting the C/C++ code to run
