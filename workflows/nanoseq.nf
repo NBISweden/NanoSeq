@@ -41,40 +41,29 @@ Main workflow
 					}
 					.set { ch_fastqs }
 
-				ch_branches.cram_bam
-					.multiMap {meta, files ->
-						def meta_duplex = meta + [type: "duplex"]
-						def meta_normal = meta + [type: "normal"]
-						duplex: [meta_duplex, [files[0], files[1]]]
-						normal: [meta_normal, [files[2], files[3]]]
-					}
-					.set { ch_cram_bam }
-
-			// Create BWA and samtools index files if they don't exist
+			// Create BWA and samtools index files if they don't exist, store alongside reference FASTA
 
 				INDEX_REFERENCE (ch_reference)
 
-			// Preprocessing
+		// Preprocessing
 
-				// FASTQ only steps
+			// Extracts 3 nucleotide barcodes from R1 and matched R2 reads, tags FASTQ header with rb and mb (read barcode and mate barcode), strips remaining spacer to leave only non-adapter sequence
 
-					// Add NanoSeq tags to FASTQ, take both duplex and normal read channels
+				ADD_NANOSEQ_FASTQ_TAGS (ch_fastqs.duplex.mix(ch_fastqs.normal))
 
-						ADD_NANOSEQ_FASTQ_TAGS (ch_fastqs.duplex.mix(ch_fastqs.normal))
+			// Map reads to reference genome, output CRAM
 
-					// Map FASTQ samples
+				BWA_MEM2_MAP (ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
-						BWA_MEM2_MAP (ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+			// Mark duplicates
 
-					// Mark duplicates
+				MARK_DUPLICATES (BWA_MEM2_MAP.out.ch_cram, ch_reference.collect())
 
-						MARK_DUPLICATES (BWA_MEM2_MAP.out.ch_cram, ch_reference.collect())
+			// Add read bundles
 
-				// Shared steps
+				ADD_READ_BUNDLES (MARK_DUPLICATES.out.ch_cram, ch_reference.collect())
 
-					// Add read bundles
 
-						ADD_READ_BUNDLES (MARK_DUPLICATES.out.ch_cram.mix(ch_cram_bam.duplex, ch_cram_bam.normal), ch_reference.collect())
 
 					// Deduplicate
 
