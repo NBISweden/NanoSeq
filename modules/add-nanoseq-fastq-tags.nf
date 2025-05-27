@@ -24,7 +24,7 @@ process ADD_NANOSEQ_FASTQ_TAGS {
 
 		length=\$(awk 'NR==2 { print length; exit }' <(zcat "${reads[0]}"))
 
-	# Extract tags
+	# Run extract tags script
 
 		extract_tags.py -a ${reads[0]} -b ${reads[1]} -c ${meta.id}_${meta.type}_R1.fastq.gz -d ${meta.id}_${meta.type}_R2.fastq.gz -m ${params.fastq_tags_m} -s ${params.fastq_tags_s} -l \$length
 

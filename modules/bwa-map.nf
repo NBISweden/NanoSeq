@@ -21,13 +21,11 @@ process BWA_MEM2_MAP {
 	tuple val(task.process), val('htslib'), eval('bgzip --version | head -n 1 | sed "s/.* //"'), topic: versions
 
 	script:
-	def args = task.ext.args ?: '-C'
-	def args2 = task.ext.args2
 	"""
 
-	bwa-mem2 mem ${args} -t ${task.cpus} ${reference_fasta} ${reads} | \
-		samtools sort --threads ${task.cpus} ${args2} - | \
-		samtools view --threads ${task.cpus} -T ${reference_fasta} -o ${meta.id}_${meta.type}.cram
+	bwa-mem2 mem -C -t ${task.cpus} ${reference_fasta} ${reads} | \
+		samtools sort --threads ${task.cpus} -n -O bam -l 0 -m 2G - | \
+		samtools view --threads ${task.cpus} --reference ${reference_fasta} --output ${meta.id}_${meta.type}.cram
 
 	"""
 
