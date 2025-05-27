@@ -2,7 +2,7 @@ process EFFICIENCY {
 
 	// Directives
 
-	debug true
+	debug false
 	tag "${meta.id}_${meta.type}"
 	label 'process_low'
 	container 'docker://ghcr.io/nbisweden/nanoseq-src:latest'
@@ -13,8 +13,8 @@ process EFFICIENCY {
 	path indexes
 
 	output:
-	path "${meta.id}_${meta.type}.efficiency.tsv", emit: ch_efficiency_tsv
-	// TODO: Version report
+	path "${meta.id}_${meta.type}.efficiency*tsv", emit: ch_efficiency_tsv
+	path "${meta.id}_${meta.type}.efficiency.RBs.pdf", emit: ch_efficiency_pdf
 
 	script:
 	"""

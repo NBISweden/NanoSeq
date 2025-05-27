@@ -40,6 +40,7 @@ Changes made to the original codebase are summarised in the CHANGES.md file, and
 		publish:
 
 			NANOSEQ.out.ch_efficiency_tsv >> 'efficiency'
+			NANOSEQ.out.ch_efficiency_pdf >> 'efficiency_plot'
 			NANOSEQ.out.ch_versions >> 'package_versions'
 
 	}
@@ -51,7 +52,13 @@ Changes made to the original codebase are summarised in the CHANGES.md file, and
 		efficiency {
 			path 'efficiency_reports'
 			mode 'copy'
-			overwrite true
+			overwrite false
+		}
+
+		efficiency_plot {
+			path 'efficiency_reports'
+			mode 'copy'
+			overwrite false
 		}
 
 		package_versions {

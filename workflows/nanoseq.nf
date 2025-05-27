@@ -74,19 +74,9 @@ Main workflow
 					.map { meta, read_bundles, deduplicate -> [ meta, read_bundles + deduplicate ] }
 					.set { ch_efficiency }
 
+			// Produce efficiency reports
 
-					// TODO: Verify BAM ID
-
-			// Efficiency calculations: note at this stage channels are joined on experiment and type (i.e. the metadata field)
-
-				// Join, return channel with meta + files in one list
-
-					ADD_READ_BUNDLES.out.ch_cram.join(DEDUPLICATE.out.ch_cram).map { meta, read_bundles, deduplicate -> [ meta, read_bundles + deduplicate ] }.set { ch_normal_efficiency }
-
-				// Run calculations
-
-					EFFICIENCY (ch_normal_efficiency, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
-
+				EFFICIENCY (ch_efficiency, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
 
 
@@ -108,6 +98,7 @@ Main workflow
 			// Emit channels for publication
 
 				ch_efficiency_tsv = EFFICIENCY.out.ch_efficiency_tsv
+				ch_efficiency_pdf = EFFICIENCY.out.ch_efficiency_pdf
 				ch_versions = ch_versions
 
 	}

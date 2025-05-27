@@ -133,7 +133,7 @@ if ( $do_panel ) {
 
 
 ##########################################################################################
-# Get read bundle comformations
+# Get read bundle conformations
 my $bam = $merged_bam;
 sub count_RB {
   my %rbs;
@@ -159,10 +159,10 @@ sub count_RB {
   return( %rbs );
 }
 # Get first reads in reverse:
-print STDOUT "RB comformation: 1st reads in reverse...\n";
+print STDOUT "RB conformation: 1st reads in reverse...\n";
 my %rbf2r1 = &count_RB($threads, 82, $bam, $region, $panel);
 
-print STDOUT "RB comformation: 2nd reads in reverse...\n";
+print STDOUT "RB conformation: 2nd reads in reverse...\n";
 my %rbf1r2 = &count_RB($threads, 146, $bam, $region, $panel);
 
 foreach my $ikey (keys %rbf2r1) {
@@ -173,7 +173,7 @@ foreach my $ikey (keys %rbf1r2) {
   $rbf2r1{$ikey} = 0 if ( ! exists( $rbf2r1{$ikey}));
 }
 
-open(OUT,">$rb_output") || die "Error openning output $rb_output\n";
+open(OUT,">$rb_output") || die "Error opening output $rb_output\n";
 foreach my $rb ( keys %rbf1r2 ) {
   print OUT "$rb\t",$rbf1r2{$rb},"\t",$rbf2r1{$rb},"\n";
 }
@@ -181,7 +181,7 @@ close(OUT);
 
 ##########################################################################################
 # Call R to get the two values that inform on strand misses:
-my($reads_per_rb,$f_eff,$zib_eff,$ok_rbs,$total_rbs,$gc_both,$gc_single,$total_reads);
+my($reads_per_rb,$f_eff,$ok_rbs,$total_rbs,$gc_both,$gc_single,$total_reads);
 my $cmd = "efficiency_nanoseq.R $rb_output $ref_genome ";
 print STDOUT "Running: $cmd\n";
 my ($stdout, $stderr, $exit) = capture {
@@ -195,21 +195,19 @@ foreach (split('\n',$stdout)) {
     $reads_per_rb = (split)[1];
   } elsif(/F-EFF/) {
     $f_eff = (split)[1];
-  } elsif(/ZIB-EFF/) {
-    $zib_eff = (split)[1];
   } elsif(/OK_RBS/) {
     $ok_rbs = (split)[1];
   } elsif(/TOTAL_RBS/) {
     $total_rbs = (split)[1];
+  } elsif(/TOTAL_READS/) {
+    $total_reads = (split)[1];
   } elsif(/GC_BOTH/) {
     $gc_both = (split)[1];
   } elsif(/GC_SINGLE/) {
     $gc_single = (split)[1];
-  } elsif(/TOTAL_READS/) {
-    $total_reads = (split)[1];
   }
 }
-# Check it run properly:
+# Check it ran properly:
 open(OUT, ">$main_output") || die "Error writing to $main_output\n";
 print OUT "# Whole-genome metrics:\n";
 print OUT "NUM_READS_SEQUENCED\t$num_sequenced_reads\n";
@@ -225,7 +223,7 @@ print OUT "DUPLICATE_RATE\t$dup_rate\n";
 print OUT "# RB metrics are reported for chr/contig $region only:\n";
 
 my $bases_sequenced = $total_reads * 150;
-my $bases_ok_rbs    = $ok_rbs * (300); # assuming mates don't overlap. Removing 50 bps for varios trimmings (rough estimate)
+my $bases_ok_rbs    = $ok_rbs * (300); # assuming mates don't overlap. Removing 50 bps for various trimmings (rough estimate)
 print OUT "TOTAL_RBS\t$total_rbs\n";
 print OUT "TOTAL_READS_IN_RBS\t$total_reads\n";
 print OUT "OK_RBS(2+2)\t$ok_rbs\n";
