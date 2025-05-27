@@ -63,11 +63,16 @@ Main workflow
 
 				ADD_READ_BUNDLES (MARK_DUPLICATES.out.ch_cram, ch_reference.collect())
 
+			// Deduplicate read bundles, one read per bundle per strand
 
+				DEDUPLICATE (ADD_READ_BUNDLES.out.ch_cram, ch_reference.collect())
 
-					// Deduplicate
+			// 	Join channels on metadata (i.e. id & type) for efficiency calculation
 
-						DEDUPLICATE (ADD_READ_BUNDLES.out.ch_cram, ch_reference.collect())
+				ADD_READ_BUNDLES.out.ch_cram
+					.join(DEDUPLICATE.out.ch_cram)
+					.map { meta, read_bundles, deduplicate -> [ meta, read_bundles + deduplicate ] }
+					.set { ch_efficiency }
 
 
 					// TODO: Verify BAM ID
