@@ -30,18 +30,9 @@ Main workflow
 
 		main:
 
-			// Branch samplesheet channel according to analysis flow
+			// Create separate channels for each forward/reverse readset (1 duplex pair + 1 matched normal pair), for parallel processing
 
 				ch_samplesheet
-					.branch { meta, files ->
-						fastq: meta.format == 'fastq'
-						cram_bam: (meta.format == 'cram' || meta.format == 'bam')
-					}
-					.set { ch_branches }
-
-			// Multimap each branch, create separate channels for duplex and normal reads for parallel processing
-
-				ch_branches.fastq
 					.multiMap { meta, files ->
 						def meta_duplex = meta + [type: "duplex"]
 						def meta_normal = meta + [type: "normal"]

@@ -47,61 +47,27 @@ workflow INITIALISE {
 					.fromPath("${params.samplesheet}", checkIfExists: true)
 					.splitCsv(header: true)
 					.map { row ->
-
 						// Populate metadata fields from samplesheet
 						def meta = [
 							id: row.id,
-							format: row.input_format.toLowerCase(),
 							normalMethod: row.normal_method.toLowerCase()
 						]
-
 						// Check id names are unique
 						if (!uniqueIds.add(meta.id)) {
 							error ("ERROR: Duplicate sample ID found: ${meta.id}. All sample IDs must be unique.")
 						}
-
-						// Check that valid input formats were supplied
-						if (!['fastq', 'bam', 'cram'].contains(meta.format)) {
-							error ("ERROR: Sample '${meta.id}' has an invalid input format '${meta.format}'. Please only supply 'fastq', 'bam', or 'cram' (case insensitive).")
-						}
-
 						// Check that matched normal sequencing method is either duplex or standard
 						if (!['duplex', 'standard'].contains(meta.normalMethod)) {
 							error ("ERROR: Sample '${meta.id}' has an invalid 'normal_method' value '${meta.normalMethod}'. Please only supply 'duplex' or 'standard', depending on how your matched normal samples were sequenced (case insensitive).")
 						}
-
-						// If initial checks pass, add file paths specific to input format & check their existence
-
-						// FASTQ
-						if (meta.format == 'fastq') {
-							def files = [
-								file(row.duplex_1, checkIfExists: true),
-								file(row.duplex_2, checkIfExists: true),
-								file(row.normal_1, checkIfExists: true),
-								file(row.normal_2, checkIfExists: true)
-							]
-							return [meta, files]
-
-						// BAM with indexes
-						} else if (meta.format == 'bam') {
-							def files = [
-								file(row.duplex_1, checkIfExists: true),
-								row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file."),
-								file(row.normal_1, checkIfExists: true),
-								row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file.")
-							]
-							return [meta, files]
-
-						// CRAM with indexes
-						} else if (meta.format == 'cram') {
-							def files = [
-								file(row.duplex_1, checkIfExists: true),
-								row.duplex_2 ? file(row.duplex_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file."),
-								file(row.normal_1, checkIfExists: true),
-								row.normal_2 ? file(row.normal_2, checkIfExists: true) : error ("ERROR: Sample '${meta.id}' needs an index file.")
-							]
-							return [meta, files]
-						}
+						// Add FASTQ file paths
+						def files = [
+							file(row.duplex_1, checkIfExists: true),
+							file(row.duplex_2, checkIfExists: true),
+							file(row.normal_1, checkIfExists: true),
+							file(row.normal_2, checkIfExists: true)
+						]
+						return [meta, files]
 					}
 					.set { ch_samplesheet }
 
