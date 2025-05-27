@@ -164,8 +164,8 @@ RUN apt-get update -yq && \
 	&& update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
 	&& update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100 \
 	&& update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 100 \
- 	&& apt-get clean \
- 	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+	&& apt-get clean \
+	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ## Apt continued, install R
 
@@ -217,7 +217,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ## Metadata
 
 LABEL org.opencontainers.image.description="Docker image to run NanoSeq source codebase" \
-	org.opencontainers.image.version="0.93" \
+	org.opencontainers.image.version="0.94" \
 	org.opencontainers.image.authors="cormac.kinsella@nbis.se"
 
 ## Install apt dependencies
@@ -232,6 +232,10 @@ RUN apt-get update -yq && \
 	locales \
 	software-properties-common \
 	wget \
+	&& add-apt-repository ppa:ubuntu-toolchain-r/test && \
+	apt-get update -yq && \
+	apt-get install -yq --no-install-recommends \
+	libstdc++6 \
 	&& wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | \
 	tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc && \
 	add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" && \

@@ -7,9 +7,13 @@
 ## Changelog
 
 
+### 0.94
+
+- Tuning runtime libraries
+
 ### 0.93
 
-- Multi stage build to reduce image size and resolve compiler issues
+- Multi stage build to reduce image size and ease some compiler issues between tools
 
 - NOTE: these packages were not yet added
 
@@ -18,16 +22,16 @@
 
 ### 0.92
 
-- Include R & dependencies
+- Included R & dependencies in test image
 - Changed gcc version for R package compilation
 
 ### 0.91
 
-- Test perl & dependencies
+- Added perl & dependencies to test image
 
 ### 0.9
 
-- Overhauled test image, revised up to and including compiled c/cpp code, removing external build scripts
+- Overhauled test image, revised up to and including compiled c/cpp code, removing external build scripts in favour of Docker RUN commands
 
 ### 0.1
 

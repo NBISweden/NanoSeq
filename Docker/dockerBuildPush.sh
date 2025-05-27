@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_VERSION=0.93 # Update this line
+IMAGE_VERSION=0.94 # Update this line
 
 IMAGE_NAME="ghcr.io/nbisweden/nanoseq-src"
 
