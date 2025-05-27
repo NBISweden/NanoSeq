@@ -76,12 +76,23 @@ workflow INITIALISE {
 			Channel
 				.fromPath("${params.fasta}", checkIfExists: true)
 				.map { file ->
+					// Allow range of FASTA extensions
 					def extension = file.extension
-					if (['fa', 'fna', 'fasta'].contains(extension)) {
-						return file
-					} else {
-						error ("ERROR: Reference file '${file}' does not have a '.fa', '.fna', or '.fasta' extension, please provide a FASTA file.")
+					if (!['fa', 'fna', 'fasta'].contains(extension)) {
+						error ("ERROR: Reference file '${file}' does not have a '.fa', '.fna', or '.fasta' extension, please provide a valid FASTA file.")
 					}
+					// Ensure FASTA headers don't contain invalid characters
+					file.withReader { reader ->
+						reader.eachLine { line ->
+							if (line.startsWith('>')) {
+								def header = line.substring(1).trim()
+								if (header.contains(':') || header.contains(',')) {
+									error ("ERROR: Reference FASTA header '${header}' contains invalid characters (':' or ','). These are incompatible with a downstream script.")
+								}
+							}
+						}
+					}
+					return file
 				}
 				.set { ch_reference }
 
