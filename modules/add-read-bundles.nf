@@ -20,21 +20,8 @@ process ADD_READ_BUNDLES {
 	script:
 	"""
 
-	NLINES=\$(samtools view ${cram[0]} | head -1 | grep rb: | grep rc: | grep mb: | grep mc: | wc -l) || true
-
-	if [ \$NLINES -ne 0 ]
-
-		then
-
-			bamaddreadbundles -I *.cram -O ${meta.id}_${meta.type}.rb.cram
-			samtools index ${meta.id}_${meta.type}.rb.cram
-
-		else
-
-			cp ${cram[0]}  ${meta.id}_${meta.type}.rb.cram
-			cp ${cram[1]}  ${meta.id}_${meta.type}.rb.cram.crai
-
-	fi
+		bamaddreadbundles -I *.cram -O ${meta.id}_${meta.type}.rb.cram
+		samtools index ${meta.id}_${meta.type}.rb.cram
 
 	"""
 

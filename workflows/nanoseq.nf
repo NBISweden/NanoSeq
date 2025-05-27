@@ -55,11 +55,11 @@ Main workflow
 
 				BWA_MEM2_MAP (ADD_NANOSEQ_FASTQ_TAGS.out.ch_tagged_fastqs, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
-			// Mark duplicates
+			// Mark duplicate reads, add biobambam rc and mc tags (unclipped coordinate tags)
 
 				MARK_DUPLICATES (BWA_MEM2_MAP.out.ch_cram, ch_reference.collect())
 
-			// Add read bundles
+			// Add read bundle tags, remove reads failing QC
 
 				ADD_READ_BUNDLES (MARK_DUPLICATES.out.ch_cram, ch_reference.collect())
 
