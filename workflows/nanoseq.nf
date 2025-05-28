@@ -18,6 +18,8 @@ Main workflow
 	include { ADD_READ_BUNDLES } from '../modules/add-read-bundles.nf'
 	include { DEDUPLICATE } from '../modules/deduplicate.nf'
 	include { EFFICIENCY } from '../modules/efficiency.nf'
+	include { COVERAGE } from '../modules/coverage.nf'
+	include { PARTITION } from '../modules/partition.nf'
 
 // Main workflow
 
@@ -30,6 +32,8 @@ Main workflow
 
 		main:
 
+		// Channel preparation
+
 			// Create separate channels for each forward/reverse readset (1 duplex pair + 1 matched normal pair), for parallel processing
 
 				ch_samplesheet
@@ -41,11 +45,11 @@ Main workflow
 					}
 					.set { ch_fastqs }
 
+		// Preprocessing modules
+
 			// Create BWA and samtools index files if they don't exist, store alongside reference FASTA
 
 				INDEX_REFERENCE (ch_reference)
-
-		// Preprocessing
 
 			// Extracts 3 nucleotide barcodes from R1 and matched R2 reads, tags FASTQ header with rb and mb (read barcode and mate barcode), strips remaining spacer to leave only non-adapter sequence
 
@@ -67,11 +71,11 @@ Main workflow
 
 				DEDUPLICATE (ADD_READ_BUNDLES.out.ch_cram, ch_reference.collect())
 
-			// 	Join channels on metadata (i.e. id & type) for efficiency calculation
+			// For efficiency calculation join pre & post deduplication channels on metadata (i.e. sample id & meta_type)
 
 				ADD_READ_BUNDLES.out.ch_cram
 					.join(DEDUPLICATE.out.ch_cram)
-					.map { meta, read_bundles, deduplicate -> [ meta, read_bundles + deduplicate ] }
+					.map { meta, read_bundles, deduplicated -> [ meta, read_bundles + deduplicated ] }
 					.set { ch_efficiency }
 
 			// Produce efficiency reports
