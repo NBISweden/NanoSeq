@@ -6,19 +6,16 @@
 
 ## Changelog
 
-
 ### 0.94
 
-- Tuning runtime libraries
+- Tuning runtime libraries for particular modules
+	- Python3
+	- bcftools
+	- TODO: verifybamid
 
 ### 0.93
 
 - Multi stage build to reduce image size and ease some compiler issues between tools
-
-- NOTE: these packages were not yet added
-
-	- bcftools
-	- verifybamid
 
 ### 0.92
 

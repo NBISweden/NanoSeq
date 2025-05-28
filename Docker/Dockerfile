@@ -107,6 +107,19 @@ RUN wget https://github.com/samtools/samtools/releases/download/$SAMTOOLS_ECOSYS
 	cd /tmp && \
 	rm -rf samtools samtools.tar.bz2
 
+## Build bcftools (used in modules relying on custom dependencies)
+
+WORKDIR /tmp
+RUN wget https://github.com/samtools/bcftools/releases/download/$SAMTOOLS_ECOSYSTEM/bcftools-$SAMTOOLS_ECOSYSTEM.tar.bz2 -O bcftools.tar.bz2 && \
+	mkdir -p bcftools && \
+	tar --strip-components=1 -C bcftools -xjf bcftools.tar.bz2 && \
+	cd bcftools && \
+	./configure --enable-libgsl --enable-perl-filters --prefix=$OPT && \
+	make -j$(nproc) && \
+	make install && \
+	cd /tmp && \
+	rm -rf bcftools bcftools.tar.bz2
+
 ## Build gzstream (for compiled code)
 
 WORKDIR /tmp
@@ -230,6 +243,7 @@ RUN apt-get update -yq && \
 	libcapture-tiny-perl \
 	libfile-which-perl \
 	locales \
+	python3 \
 	software-properties-common \
 	wget \
 	&& add-apt-repository ppa:ubuntu-toolchain-r/test && \
