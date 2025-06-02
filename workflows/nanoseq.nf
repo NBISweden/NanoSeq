@@ -82,6 +82,35 @@ Main workflow
 
 				EFFICIENCY (ch_efficiency, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
+		// Main NanoSeq analysis modules
+
+			// For input, join non-deduplicated duplex and deduplicated normal CRAM files per sample
+
+				ADD_READ_BUNDLES.out.ch_cram
+					.filter { meta, read_bundles -> meta.type == 'duplex' }
+					.map { meta, read_bundles ->
+						[ meta.id, meta, read_bundles ]
+					}
+					.join(
+				DEDUPLICATE.out.ch_cram
+					.filter { meta, deduplicated -> meta.type == 'normal' }
+					.map { meta, deduplicated ->
+						[ meta.id, meta, deduplicated ]
+					}
+					)
+					.map { id, duplex_meta, read_bundles, normal_meta, deduplicated ->
+						def meta_join = duplex_meta.clone()
+						meta_join.type = 'pair'
+						[meta_join, read_bundles + deduplicated]
+						}
+					.set { ch_nanoseq_crams }
+
+			// Coverage
+
+				COVERAGE (ch_nanoseq_crams, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
+
+
 
 
 
