@@ -35,6 +35,14 @@ workflow INITIALISE {
 				error ("ERROR: This workflow requires the Apptainer executable available in PATH.")
 			}
 
+		// Optional file existence checks
+
+			if (params.bed_to_exclude) {
+				if (!file(params.bed_to_exclude).exists()) {
+					error ("ERROR: The BED file to exclude does not exist ('${params.bed_to_exclude}').")
+				}
+			}
+
 		// Parse samplesheet
 
 			// Initialise empty set to store unique sample ids

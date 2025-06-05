@@ -109,10 +109,9 @@ Main workflow
 
 				COVERAGE (ch_nanoseq_crams, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
+			// Partition
 
-
-
-
+				PARTITION (ch_nanoseq_crams, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect(), COVERAGE.out.ch_coverage)
 
 			// Report package versions
 

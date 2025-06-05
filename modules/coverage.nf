@@ -15,7 +15,7 @@ process COVERAGE {
 	path indexes
 
 	output:
-	tuple path("args.json"), path("cov.bed.gz"), path("gIntervals.dat")
+	tuple path("args.json"), path("cov.bed.gz"), path("gIntervals.dat"), emit: ch_coverage
 
 	script:
 	"""
