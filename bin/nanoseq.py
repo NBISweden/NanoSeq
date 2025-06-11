@@ -227,11 +227,11 @@ if (hasattr(args, 'ref')):
 
 if (hasattr(args, 'snp')):
 	if ( args.snp is not None ) :
-	file_chk(args.snp, ".tbi", "SNP")
+		file_chk(args.snp, ".tbi", "SNP")
 
 if (hasattr(args, 'mask')):
 	if ( args.mask is not None ) :
-	file_chk(args.mask, ".tbi", "Mask")
+		file_chk(args.mask, ".tbi", "Mask")
 
 if (hasattr(args, 'triNuc') and args.triNuc is not None):
 	if not os.path.isfile(args.triNuc):
@@ -435,7 +435,7 @@ def runBamcov(bam, mapQ, window, ichr, out):
 	runCommand("bamcov -q %s -w %s -r \"%s\" -o %s %s" %
 			(mapQ, window, ichr, out, bam))
 	runCommand("bgzip -l 2 -f %s" % (out))
-	outdone = re.sub('cov.bed$', 'done', out)
+	outdone = re.sub('cov.bed$', 'coverage_processed', out) # Produce file to confirm each chromosome processed (checked in nextflow process script)
 	open(outdone, 'w').close()
 	return
 
@@ -460,7 +460,6 @@ def getBAMcontigs(bam):
 		sys.stderr.write("\n!Error processing:  %s\n" % job)
 		raise ValueError(error)
 	return contigs
-
 
 # Create the VCF header for output files
 
@@ -513,12 +512,6 @@ if (args.index is not None):
 # Redefined tmpDir from "args.out + /tmpNanoSeq" to "args.out" (will do file/directory handling via Nextflow staging)
 
 tmpDir = args.out # i.e. pwd
-
-# Commented out creation of subdirectories (FIXME: delete at some point)
-	# if (args.subcommand == 'cov'):
-	# 	for idir in ('cov', 'part', 'dsa', 'var', 'indel', 'post'):
-	# 		if (not os.path.isdir(tmpDir+'/'+idir)):
-	# 			os.makedirs(tmpDir+'/'+idir, exist_ok=True)
 
 # Dump args to file (changed from directory separation to subcommand-based file naming)
 
@@ -603,29 +596,24 @@ if (args.subcommand == 'cov'):
 	print("\nAnalysing contigs: %s\n" % chrList)
 	print("Starting cov calculation\n")
 
-	# if (args.index is None or args.index == 1):
-	# 	with open("nfiles"), "w") as iofile: # FIXME: since their implementation in Nextflow eventually results in one file via concatenation, this will be obsolete
-	# 		iofile.write(str(len(chrList)))  # Prefer not producing it, and feed "1" to the next step. TODO: remember to concat the files together though, into cov.bed.gz
+	# Create nfiles, number of files that will be looped over in next step
+	if (args.index is None or args.index == 1):
+		with open(f"{tmpDir}/nfiles", "w") as iofile:
+			iofile.write(str(len(chrList)))
 
-#### TODO: done to here...
 	inputs = []
 	for ii, ichr in enumerate(chrList):
-		if (os.path.isfile("%s/cov/%s.done" % (tmpDir, ii + 1))):
-			# restart, don't do anything
-			inputs.append((None, None, None, None, None))
-		else:
-			inputs.append((args.duplex, str(args.Q), str(
-				args.win), ichr, "%s/cov/%s" % (tmpDir, ii + 1)))
+		inputs.append((args.duplex, str(args.Q), str(args.win), ichr, f"{ii + 1}"))
 	if (args.index is None):
 		# multiple threads are available
-		with open("%s/cov/%s" % (tmpDir, 'gIntervals.dat'), 'wb') as iofile:
+		with open(f"{tmpDir}/gIntervals.dat", 'wb') as iofile:
 			pickle.dump(gintervals, iofile)
 		with Pool(args.threads) as p:
 			p.starmap(runBamcov, inputs)
 	else:
 		# single thread execution
 		if (args.index == 1):
-			with open("%s/cov/%s" % (tmpDir, 'gIntervals.dat'), 'wb') as iofile:
+			with open(f"{tmpDir}/gIntervals.dat", 'wb') as iofile:
 				pickle.dump(gintervals, iofile)
 
 		commands = [[] for i in range(args.max_index)]
@@ -641,7 +629,8 @@ if (args.subcommand == 'cov'):
 
 	print("Completed cov calculation\n")
 
-# merge coverage files, partition into desired number of jobs
+# Partition subcommand: merge coverage files, partition into desired number of jobs
+# TODO: here
 if (args.subcommand == 'part'):
 	if (os.path.isfile("%s/part/1.done" % (tmpDir))):
 		exit(0)  # restart
