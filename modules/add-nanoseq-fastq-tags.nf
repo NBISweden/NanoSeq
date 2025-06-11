@@ -15,7 +15,7 @@ process ADD_NANOSEQ_FASTQ_TAGS {
 	output:
 	tuple val(meta), path("*.fastq.gz"), emit: ch_tagged_fastqs
 	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
-	tuple val(task.process), val('runNanoSeq.py'), eval('runNanoSeq.py -v'), topic: versions
+	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 
 	script:
 	"""

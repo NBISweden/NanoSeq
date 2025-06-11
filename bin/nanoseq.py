@@ -630,31 +630,16 @@ if (args.subcommand == 'cov'):
 	print("Completed cov calculation\n")
 
 # Partition subcommand: merge coverage files, partition into desired number of jobs
-# TODO: here
-if (args.subcommand == 'part'):
-	if (os.path.isfile("%s/part/1.done" % (tmpDir))):
-		exit(0)  # restart
-	if (not os.path.isfile(tmpDir+'/cov/args.json')):
-		sys.exit("\nMust run cov subcommand prior to part\n")
-	else:
-		with open(tmpDir+'/cov/args.json') as iofile:
-			oargs = json.load(iofile)
-	if (not os.path.isfile(tmpDir+'/cov/nfiles')):
-		sys.exit(tmpDir+'/cov/nfiles not found!\n')
-	else:
-		with open(tmpDir+'/cov/nfiles') as iofile:
-			nfiles = int(iofile.readline())
-	for i in range(nfiles):
-		if (len(glob.glob(tmpDir+"/cov/%s.done" % (i+1))) != 1):
-			sys.exit("\ncov job %s did not complete correctly\n" % (i+1))
-		if (len(glob.glob(tmpDir+"/cov/%s.cov.bed.gz" % (i+1))) != 1):
-			sys.exit("\ncov job %s did not complete correctly\n" % (i+1))
 
+if (args.subcommand == 'part'):
+	with open(f"{tmpDir}/cov_args.json") as iofile:
+		oargs = json.load(iofile)
+	with open(f"{tmpDir}/nfiles") as iofile:
+		nfiles = int(iofile.readline())
 	if (args.index is not None and args.index > 1):
 		print("\nWarning can only use 1 job of array\n")
 		sys.exit(0)
-
-	with open(tmpDir+"/cov/gIntervals.dat", 'rb') as iofile:
+	with open(f"{tmpDir}/gIntervals.dat", 'rb') as iofile:
 		gIntervals = pickle.load(iofile)
 
 	coverage = []
@@ -663,7 +648,7 @@ if (args.subcommand == 'part'):
 	tmpIntervals = []
 	print("\nParsing coverage files\n")
 	for i in range(nfiles):
-		with gzip.open(tmpDir+"/cov/%s.cov.bed.gz" % (i+1), 'rt') as iofile:
+		with gzip.open(f"{tmpDir}/{i+1}.cov.bed.gz", 'rt') as iofile:
 			for iline in iofile:
 				ichr = str(iline.split('\t')[0])
 				ib = int(iline.split('\t')[1])
@@ -678,7 +663,7 @@ if (args.subcommand == 'part'):
 				coverage.append([ib, cc])
 	print("\nCompleted parsing coverage files\n")
 
-	# remove regions to ignore from exclude BED
+	# Remove regions to ignore from exclude BED
 	if (args.excludeBED is not None):
 		with gzip.open(args.excludeBED, 'rt') as iofile:
 			for iline in iofile:
@@ -696,16 +681,15 @@ if (args.subcommand == 'part'):
 			xIntervals.extend(xIntervals.pop() + tmpIntervals.pop(0))
 
 		print("\nExcluding %s intervals, dumping to BED file : %s \n" %
-			(len(xIntervals), "%s/part/exclude.bed" % tmpDir))
+			(len(xIntervals), "exclude.bed"))
 		if (args.index is None or args.index == 1):
-			with open("%s/part/%s" % (tmpDir, 'exclude.bed'), 'w') as iofile:
+			with open("exclude.bed", 'w') as iofile:
 				for ii in xIntervals:
 					iofile.write("%s\t%s\t%s\n" % (ii.chr, ii.beg-1, ii.end))
-			cmd = "bgzip -f %s/part/%s; sleep 3; bgzip -t %s/part/%s; tabix %s/part/%s" % (
-				tmpDir, 'exclude.bed', tmpDir, 'exclude.bed.gz', tmpDir, 'exclude.bed.gz')
+			cmd = "bgzip -f exclude.bed; sleep 3; bgzip -t exclude.bed.gz; tabix exclude.bed.gz"
 			runCommand(cmd)
 
-		# remove the excluded intervals
+		# Remove the excluded intervals
 		iiresult = []
 		for ii in gIntervals:
 			ifrag = ii
@@ -724,7 +708,7 @@ if (args.subcommand == 'part'):
 				iiresult.append(ifrag)
 		gIntervals = iiresult
 
-		# correct total coverage (cctotal)
+		# Correct total coverage (cctotal)
 		xSumCov = 0
 		for iinterval in gIntervals:
 			ichar = iinterval.chr
@@ -736,8 +720,7 @@ if (args.subcommand == 'part'):
 				xSumCov += coverage[j][1]
 		cctotal = xSumCov
 
-	# determine the genomic intervals to give to each job so that each one roughly
-	# has the same amount of coverage
+	# Determine the genomic intervals to give each job roughly equivalent coverage
 	basesPerCPU = 0
 	njobs = args.jobs
 	basesPerCPU = cctotal / njobs
@@ -768,8 +751,8 @@ if (args.subcommand == 'part'):
 		intervalsPerCPU.append(oIntervals)
 	while ( len(intervalsPerCPU) < njobs ) :
 		intervalsPerCPU.append([])
-	# check partitioning code is working as expected
-	# compare merged partitioned intervals to original gIntervals (copy)
+
+	# Check partitioning code is working as expected (compare merged partitioned intervals to original gIntervals)
 	print("\nChecking partition of intervals..", end='')
 	flatInt = [item for sublist in intervalsPerCPU[0:njobs] for item in sublist]
 	nbases1 = 0
@@ -789,13 +772,12 @@ if (args.subcommand == 'part'):
 			sys.exit("Internal check failed: mismatch after part (interval %s should be %s)\n" % (
 				mIntervals[i], ival))
 	print(" OK\n")
-	with open("%s/part/%s" % (tmpDir, 'intervalsPerCPU.dat'), 'wb') as iofile:
+	with open(f"{tmpDir}/intervalsPerCPU.dat", 'wb') as iofile:
 		pickle.dump(intervalsPerCPU, iofile)
-	cmd = "touch %s/part/1.done" % (tmpDir)
-	runCommand(cmd)
 	print("\nCompleted part job\n")
 
 # dsa section
+
 if (args.subcommand == 'dsa'):
 	if (not os.path.isfile(tmpDir+'/part/args.json')):
 		sys.exit("\nMust run cov and part subcommands prior to dsa\n")

@@ -2,7 +2,7 @@ process PARTITION {
 
 	// Directives
 
-	debug true
+	debug false
 	tag "${meta.id}_${meta.type}"
 	label 'process_medium'
 	container 'docker://ghcr.io/nbisweden/nanoseq-src:latest'
@@ -13,14 +13,10 @@ process PARTITION {
 	tuple val(meta), path(crams)
 	path reference_fasta
 	path indexes
-	tuple path(cov_args), path(cov_bed), path(g_intervals)
+	tuple path(cov_args), path(cov_beds), path(g_intervals), path(nfiles)
 
 	output :
-		// tuple  val(meta), path(duplex), path(index_duplex), path(normal), path(index_normal), emit : done
-		// path 'part/1.done'
-		// path 'part/intervalsPerCPU.dat'
-		// path 'part/args.json'
-
+	tuple path("part_args.json"), path("intervalsPerCPU.dat"), emit: ch_partition
 
 	script :
 	def args = task.ext.args ?: ''
@@ -30,7 +26,7 @@ process PARTITION {
 
 	# Run NanoSeq partition script
 
-		# partition.py --threads ${task.cpus} --jobs ${params.jobs} ${args} ${args2}
+		nanoseq.py  --ref ${reference_fasta} --normal ${crams[2]} --duplex ${crams[0]} --threads ${task.cpus} part --jobs ${params.jobs} ${args} ${args2}
 
 	"""
 
