@@ -20,7 +20,7 @@ process DEDUPLICATE {
 	script:
 	"""
 
-		randomreadinbundle -I ${cram[0]} -O ${meta.id}_${meta.type}.dedup.cram -m ${params.minimumReadsInBundle}
+		randomreadinbundle -I ${cram[0]} -O ${meta.id}_${meta.type}.dedup.cram -m ${params.minReadsInBundle}
 		samtools index ${meta.id}_${meta.type}.dedup.cram
 
 	"""
