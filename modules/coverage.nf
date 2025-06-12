@@ -15,7 +15,9 @@ process COVERAGE {
 	path indexes
 
 	output:
-	tuple path("cov_args.json"), path("*cov.bed.gz"), path("gIntervals.dat"), path("nfiles"), emit: ch_coverage
+	tuple val(meta), path(crams), path("cov_args.json"), path("*cov.bed.gz"), path("gIntervals.dat"), path("nfiles"), emit: ch_coverage
+	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
+	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 
 	script:
 	"""

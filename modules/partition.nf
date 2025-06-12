@@ -10,13 +10,14 @@ process PARTITION {
 	// I/O & script
 
 	input:
-	tuple val(meta), path(crams)
+	tuple val(meta), path(crams), path(cov_args), path(cov_beds), path(g_intervals), path(nfiles)
 	path reference_fasta
 	path indexes
-	tuple path(cov_args), path(cov_beds), path(g_intervals), path(nfiles)
 
 	output :
-	tuple path("part_args.json"), path("intervalsPerCPU.dat"), emit: ch_partition
+	tuple val(meta), path(crams), path("part_args.json"), path("intervalsPerCPU.dat"), emit: ch_partition
+	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
+	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 
 	script :
 	def args = task.ext.args ?: ''

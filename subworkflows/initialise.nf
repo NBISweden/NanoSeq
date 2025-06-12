@@ -43,6 +43,26 @@ workflow INITIALISE {
 				}
 			}
 
+			if (params.snp_bed) {
+				if (!file(params.snp_bed).exists()) {
+					error ("ERROR: The SNP BED file does not exist ('${params.snp_bed}').")
+				}
+				def snp_bed_index = params.snp_bed + '.tbi'
+				if (!file(snp_bed_index).exists()) {
+					error ("ERROR: The SNP BED index file does not exist ('${snp_bed_index}'). Ensure you have indexed the sorted BED with tabix.")
+				}
+			}
+
+			if (params.noise_bed) {
+				if (!file(params.noise_bed).exists()) {
+					error ("ERROR: The noise BED file does not exist ('${params.noise_bed}').")
+				}
+				def noise_bed_index = params.noise_bed + '.tbi'
+				if (!file(noise_bed_index).exists()) {
+					error ("ERROR: The noise BED index file does not exist ('${noise_bed_index}'). Ensure you have indexed the sorted BED with tabix.")
+				}
+			}
+
 		// Parse samplesheet
 
 			// Initialise empty set to store unique sample ids

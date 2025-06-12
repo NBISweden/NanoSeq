@@ -20,6 +20,7 @@ Main workflow
 	include { EFFICIENCY } from '../modules/efficiency.nf'
 	include { COVERAGE } from '../modules/coverage.nf'
 	include { PARTITION } from '../modules/partition.nf'
+	include { DSA } from '../modules/dsa.nf'
 
 // Main workflow
 
@@ -111,7 +112,13 @@ Main workflow
 
 			// Partition
 
-				PARTITION (ch_nanoseq_crams, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect(), COVERAGE.out.ch_coverage)
+				PARTITION (COVERAGE.out.ch_coverage, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
+				jobIndexes = Channel.of(1..params.jobs)
+
+			// DSA
+
+				DSA (PARTITION.out.ch_partition, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect(), jobIndexes)
 
 			// Report package versions
 
