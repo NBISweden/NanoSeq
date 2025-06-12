@@ -17,8 +17,6 @@ process DSA {
 
 	output:
 	tuple val(metaOut), path(crams), path("*.dsa.bed.gz"), emit: ch_dsa
-	// 	TODO: path "dsa/nfiles" optional true
-	// 	TODO: path "dsa/args.json" optional true
 	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
 	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 
@@ -33,11 +31,11 @@ process DSA {
 
 		# Rather than require the cov_args.json file, get the value directly from the parameter
 
-			echo "{\\"Q\\": ${params.minimum_duplex_mapq}}" > minimum_duplex_mapq.json
+			echo "{\\"Q\\": ${params.min_duplex_mapq}}" > minimum_duplex_mapq.json
 
 		# Run NanoSeq DSA script
 
-			nanoseq.py --ref ${reference_fasta} --normal ${crams[2]} --duplex ${crams[0]} --index ${jobindex} --max_index ${params.jobs} dsa -d ${params.minimum_duplex_depth} -q ${params.minimum_normal_base_quality} ${args} ${args2}
+			nanoseq.py --ref ${reference_fasta} --duplex ${crams[0]} --normal ${crams[2]} --index ${jobindex} --max_index ${params.jobs} dsa -d ${params.min_duplex_depth} -q ${params.min_normal_base_quality} ${args} ${args2}
 
 	"""
 

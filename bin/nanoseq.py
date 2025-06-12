@@ -833,13 +833,8 @@ if (args.subcommand == 'dsa'):
 		# Check number of fields in the last line is equal to 45
 		cmd += f"awk  \'END{{  if (NF != 45)  print \"Truncated dsa output file for job {i+1} !\" > \"/dev/stderr\"}}{{ if (NF != 45) exit 1 }}\' {tmpDir}/{i+1}.dsa.bed;"
 		cmd += f"bgzip -f -l 2 {tmpDir}/{i+1}.dsa.bed; sleep 2; bgzip -t {tmpDir}/{i+1}.dsa.bed.gz"
-
 		if ( len(intervalsPerCPU[i]) == 0 ) : cmd = f"touch {tmpDir}/{i+1}.dsa.bed.gz; touch {tmpDir}/{i+1}.done"
 		commands[i] = (cmd, )
-
-	if (args.index is None or args.index == 1):
-		with open(f"{tmpDir}/nfiles", "w") as iofile:
-			iofile.write(str(njobs))
 
 	# Execute DSA commands
 	print("Starting DSA calculation\n")
@@ -853,29 +848,15 @@ if (args.subcommand == 'dsa'):
 	print("Completed DSA calculation\n")
 
 # Variant calling section
+
 if (args.subcommand == 'var'):
-	if (not os.path.isfile(tmpDir+'/dsa/args.json')):
-		sys.exit("\nMust run dsa subcommand prior to var\n")
-	else:
-		with open(tmpDir+'/dsa/args.json') as iofile:
-			oargs = json.load(iofile)
 
-	if (not os.path.isfile(tmpDir+'/dsa/nfiles')):
-		sys.exit(tmpDir+'/dsa/nfiles not found!\n')
-	else:
-		with open(tmpDir+'/dsa/nfiles') as iofile:
-			nfiles = int(iofile.readline())
-	njobs = nfiles
+	with open(f"{tmpDir}/nfiles") as iofile:
+		njobs = int(iofile.readline())
 
-	for i in range(nfiles):
-		if (len(glob.glob(tmpDir+"/dsa/%s.done" % (i+1))) != 1):
-			sys.exit("\ndsa job %s did not complete correctly\n" % (i+1))
-		if (len(glob.glob(tmpDir+"/dsa/%s.dsa.bed.gz" % (i+1))) != 1):
-			sys.exit("\ndsa job %s did not complete correctly\n" % (i+1))
-
-	# make sure that number of jobs matches what was specified in part
+	# Ensure jobs matches number specified in partition
 	if (args.max_index is not None):
-		# array execution
+		# Array execution
 		if (args.max_index < njobs):
 			sys.exit(
 				"\nLSF array size must match number of jobs specified for part (%s)\n" % njobs)
@@ -884,7 +865,7 @@ if (args.subcommand == 'var'):
 				"\nWarning specified LSF array size is larger than jobs specified for part (%s)\n" % njobs)
 			sys.exit(0)
 	else:
-		# multithread
+		# Multithread
 		if (args.threads < njobs):
 			sys.exit(
 				"\nNumber of threads must match number of jobs specified for part (%s)\n" % njobs)
@@ -893,35 +874,24 @@ if (args.subcommand == 'var'):
 				"\nWarning number of threads is larger than jobs specified for part (%s)\n" % njobs)
 
 	commands = [(None,)] * njobs
-	for i in range(njobs):
-		# check for restarts
-		if (os.path.isfile("%s/var/%s.done" % (tmpDir, i+1)) and
-			os.path.isfile("%s/var/%s.var" % (tmpDir, i+1)) and
-				os.path.isfile("%s/var/%s.cov.bed.gz" % (tmpDir, i+1))):
-			continue
 
-		# construct variantcaller commands
-		cmd = "variantcaller -B %s -U %s -O %s -D %s -a %s -b %s -c %s -d %s -f %s -i %s -m %s -n %s -p %s -q %s -r %s -v %s -x %s -z %s ;" \
-			% ("%s/dsa/%s.dsa.bed.gz" % (tmpDir, i+1), "%s/var/%s.cov.bed" % (tmpDir, i+1), "%s/var/%s.var" % (tmpDir, i+1), "%s/var/%s.discarded_var" % (tmpDir, i+1),
-			args.a, args.b, args.c, args.d, args.f, args.i, args.m, args.n, args.p, args.q, args.r, args.v, args.x, args.z)
-		cmd += "touch %s/var/%s.done" % (tmpDir, i+1)
-		if ( os.stat("%s/dsa/%s.dsa.bed.gz"%(tmpDir, i+1)).st_size == 0) : cmd = "touch %s/var/%s.var; touch %s/var/%s.discarded_var; touch %s/var/%s.cov.bed.gz; touch %s/var/%s.done" % (tmpDir, i+1,tmpDir, i+1,tmpDir, i+1,tmpDir, i+1)
+	# Construct variantcaller commands
+	for i in range(njobs):
+		cmd = f"variantcaller -B {tmpDir}/{i+1}.dsa.bed.gz -U {tmpDir}/{i+1}.cov.bed -O {tmpDir}/{i+1}.var -D {tmpDir}/{i+1}.discarded_var -a {args.a} -b {args.b} -c {args.c} -d {args.d} -f {args.f} -i {args.i} -m {args.m} -n {args.n} -p {args.p} -q {args.q} -r {args.r} -v {args.v} -x {args.x} -z {args.z}"
 		commands[i] = (cmd, )
 
-	if (args.index is None or args.index == 1):
-		with open("%s/var/nfiles" % (tmpDir), "w") as iofile:
-			iofile.write(str(njobs))
-
-	# execute variantcaller commands
+	# Execute variantcaller commands
 	print("Starting var calculation\n")
 	if (args.index is None):
-		# multithread
+		# Multithread
 		with Pool(args.threads) as p:
 			p.starmap(runCommand, commands)
 	else:
-		# array execution
+		# Array execution
 		runCommand(commands[args.index - 1][0])
 	print("Completed var calculation\n")
+
+
 
 # indel section
 if (args.subcommand == 'indel'):

@@ -21,6 +21,7 @@ Main workflow
 	include { COVERAGE } from '../modules/coverage.nf'
 	include { PARTITION } from '../modules/partition.nf'
 	include { DSA } from '../modules/dsa.nf'
+	include { VARIANT_CALLING } from '../modules/variant-calling.nf'
 
 // Main workflow
 
@@ -119,6 +120,13 @@ Main workflow
 			// DSA
 
 				DSA (PARTITION.out.ch_partition, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect(), jobIndexes)
+
+			// Variant calling
+
+				VARIANT_CALLING (DSA.out.ch_dsa, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
+
+
 
 			// Report package versions
 

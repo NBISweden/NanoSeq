@@ -24,7 +24,7 @@ process COVERAGE {
 
 	# Run NanoSeq coverage script
 
-		nanoseq.py --ref ${reference_fasta} --normal ${crams[2]} --duplex ${crams[0]} --threads ${task.cpus} cov -Q ${params.minimum_duplex_mapq} --exclude \"${params.contig_exclude}\" --include \"${params.contig_include}\" --larger ${params.contig_larger_than}
+		nanoseq.py --ref ${reference_fasta} --duplex ${crams[0]} --normal ${crams[2]} --threads ${task.cpus} cov -Q ${params.min_duplex_mapq} --exclude \"${params.contig_exclude}\" --include \"${params.contig_include}\" --larger ${params.contig_larger_than}
 
 	# Ensure all expected outputs were created
 

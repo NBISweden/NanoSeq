@@ -27,7 +27,7 @@ process PARTITION {
 
 	# Run NanoSeq partition script
 
-		nanoseq.py  --ref ${reference_fasta} --normal ${crams[2]} --duplex ${crams[0]} --threads ${task.cpus} part --jobs ${params.jobs} ${args} ${args2}
+		nanoseq.py  --ref ${reference_fasta} --duplex ${crams[0]} --normal ${crams[2]} --threads ${task.cpus} part --jobs ${params.jobs} ${args} ${args2}
 
 	"""
 
