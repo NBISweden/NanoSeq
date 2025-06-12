@@ -29,13 +29,13 @@ process DSA {
 
 	"""
 
-		# Rather than require the cov_args.json file, get the value directly from the parameter
+	# Rather than require the cov_args.json file, get the value directly from the parameter
 
-			echo "{\\"Q\\": ${params.min_duplex_mapq}}" > minimum_duplex_mapq.json
+		echo "{\\"Q\\": ${params.min_duplex_mapq}}" > minimum_duplex_mapq.json
 
-		# Run NanoSeq DSA script
+	# Run NanoSeq DSA script
 
-			nanoseq.py --ref ${reference_fasta} --duplex ${crams[0]} --normal ${crams[2]} --index ${jobindex} --max_index ${params.jobs} dsa -d ${params.min_duplex_depth} -q ${params.min_normal_base_quality} ${args} ${args2}
+		nanoseq.py --ref ${reference_fasta} --duplex ${crams[0]} --normal ${crams[2]} --index ${jobindex} --max_index ${params.jobs} dsa -d ${params.min_duplex_depth} -q ${params.min_normal_base_quality} ${args} ${args2}
 
 	"""
 

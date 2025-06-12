@@ -22,9 +22,9 @@ process INDEX_REFERENCE {
 	script:
 	"""
 
-	bwa-mem2 index ${reference_fasta}
-	samtools faidx ${reference_fasta}
-	samtools dict ${reference_fasta} > ${reference_fasta}.dict
+		bwa-mem2 index ${reference_fasta}
+		samtools faidx ${reference_fasta}
+		samtools dict ${reference_fasta} > ${reference_fasta}.dict
 
 	"""
 
