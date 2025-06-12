@@ -2,7 +2,7 @@ process DSA {
 
 	// Directives
 
-	debug true
+	debug false
 	tag "${meta.id}_${meta.type}_${jobindex}"
 	label 'process_medium'
 	container 'docker://ghcr.io/nbisweden/nanoseq-src:latest'
@@ -16,13 +16,11 @@ process DSA {
 	each jobindex
 
 	output:
-	// 	tuple val(metaOut), path(duplex), path(index_duplex), path(normal), path(index_normal), emit : done
-	// 	path "dsa/${ii}.done"
-	// 	path "dsa/${ii}.dsa.bed.gz"
-	// 	path "dsa/nfiles" optional true
-	// 	path "dsa/args.json" optional true
-	// tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
-	// tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
+	tuple val(metaOut), path(crams), path("*.dsa.bed.gz"), emit: ch_dsa
+	// 	TODO: path "dsa/nfiles" optional true
+	// 	TODO: path "dsa/args.json" optional true
+	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
+	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 
 	script:
 	def args = task.ext.args ?: ''
@@ -33,7 +31,13 @@ process DSA {
 
 	"""
 
-		nanoseq.py --ref ${reference_fasta} --normal ${crams[2]} --duplex ${crams[0]} --index ${jobindex} --max_index ${params.jobs} dsa -d ${params.minimum_duplex_depth} -q ${params.minimum_normal_base_quality} ${args} ${args2}
+		# Rather than require the cov_args.json file, get the value directly from the parameter
+
+			echo "{\\"Q\\": ${params.minimum_duplex_mapq}}" > minimum_duplex_mapq.json
+
+		# Run NanoSeq DSA script
+
+			nanoseq.py --ref ${reference_fasta} --normal ${crams[2]} --duplex ${crams[0]} --index ${jobindex} --max_index ${params.jobs} dsa -d ${params.minimum_duplex_depth} -q ${params.minimum_normal_base_quality} ${args} ${args2}
 
 	"""
 

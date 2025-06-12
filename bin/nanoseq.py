@@ -106,7 +106,7 @@ parser_partO.add_argument('--excludeCov', type=int, action='store',
 						help='Exclude regions with coverage values higher than this')
 parser_part._action_groups.append(parser_partO)
 
-## DSA subcommand (Duplex Sequencing Analysis)
+## DSA subcommand
 parser_dsa = subparsers.add_parser('dsa', help='Compute DSA tables')
 parser_dsaO = parser_dsa._action_groups.pop()
 parser_dsaR = parser_dsa.add_argument_group('required arguments')
@@ -776,24 +776,16 @@ if (args.subcommand == 'part'):
 		pickle.dump(intervalsPerCPU, iofile)
 	print("\nCompleted part job\n")
 
-# dsa section
+# DSA section
 
 if (args.subcommand == 'dsa'):
-	if (not os.path.isfile(tmpDir+'/part/args.json')):
-		sys.exit("\nMust run cov and part subcommands prior to dsa\n")
-	else:
-		with open(tmpDir+'/part/args.json') as iofile:
+	with open(f"{tmpDir}/part_args.json") as iofile:
 			oargs = json.load(iofile)
 	njobs = oargs['jobs']
 
-	if (len(glob.glob(tmpDir+"/part/1.done")) != 1):
-		sys.exit("\npart job did not complete correctly\n")
-	if (len(glob.glob(tmpDir+"/part/intervalsPerCPU.dat")) != 1):
-		sys.exit("\npart job did not complete correctly\n")
-
-	# make sure that number of jobs matches what was specified in part
+	# Ensure number of jobs matches that specified in part
 	if (args.max_index is not None):
-		# array execution
+		# Array execution
 		if (args.max_index < njobs):
 			sys.exit(
 				"\nLSF array size must match number of jobs specified for part (%s)\n" % njobs)
@@ -802,7 +794,7 @@ if (args.subcommand == 'dsa'):
 				"\nWarning specified LSF array size is larger than jobs specified for part (%s)\n" % njobs)
 			sys.exit(0)
 	else:
-		# multithread
+		# Multithread
 		if (args.threads < njobs):
 			sys.exit(
 				"\nNumber of threads must match number of jobs specified for part (%s)\n" % njobs)
@@ -810,21 +802,16 @@ if (args.subcommand == 'dsa'):
 			print(
 				"\nWarning number of threads is larger than jobs specified for part (%s)\n" % njobs)
 
-	with open(tmpDir+"/part/intervalsPerCPU.dat", 'rb') as iofile:
+	with open(f"{tmpDir}/intervalsPerCPU.dat", 'rb') as iofile:
 		intervalsPerCPU = pickle.load(iofile)
 
 	mapQ = None
-	with open(tmpDir+'/cov/args.json') as iofile:
+	with open(f"{tmpDir}/minimum_duplex_mapq.json") as iofile:
 		mapQ = json.load(iofile)['Q']
 
 	commands = [(None, )] * njobs
 	for i in range(njobs):
-		# check for restarts
-		if (os.path.isfile("%s/dsa/%s.done" % (tmpDir, i+1)) and
-				os.path.isfile("%s/dsa/%s.dsa.bed.gz" % (tmpDir, i+1))):
-			continue
-
-		# construct dsa commands
+		# Construct DSA commands
 		cmd = ""
 		testOpt = ""
 		snpOpt = ""
@@ -841,31 +828,31 @@ if (args.subcommand == 'dsa'):
 			pipe = ">" if ii == 0 else ">>"  # ensure first command overwrittes
 			cmd += "dsa -A %s -B %s  %s %s -R %s -d %s -Q %s -M %s %s -r \"%s\" -b %s -e %s %s %s ;" \
 				% (args.normal, args.duplex, snpOpt, maskOpt, args.ref, args.d, args.q, mapQ, testOpt,
-				dsaInt.chr, dsaInt.beg, dsaInt.end, pipe, "%s/dsa/%s.dsa.bed" % (tmpDir, i + 1))
-		# check number of fields in the last line it has to have 45 fields
-		cmd += "awk  \'END{  if (NF != 45)  print \"Truncated dsa output file for job %s !\" > \"/dev/stderr\"}{ if (NF != 45) exit 1 }\' %s/dsa/%s.dsa.bed;" % (i+1, tmpDir, i+1)
-		cmd += "bgzip -f -l 2 %s/dsa/%s.dsa.bed; sleep 2; bgzip -t %s/dsa/%s.dsa.bed.gz;" % (
-			tmpDir, i+1, tmpDir, i+1)
-		cmd += "touch %s/dsa/%s.done" % (tmpDir, i+1)
-		if ( len(intervalsPerCPU[i]) == 0 ) : cmd = "touch %s/dsa/%s.dsa.bed.gz;touch %s/dsa/%s.done" % (tmpDir, i+1,tmpDir, i+1)
+				dsaInt.chr, dsaInt.beg, dsaInt.end, pipe, f"{tmpDir}/{i + 1}.dsa.bed")
+
+		# Check number of fields in the last line is equal to 45
+		cmd += f"awk  \'END{{  if (NF != 45)  print \"Truncated dsa output file for job {i+1} !\" > \"/dev/stderr\"}}{{ if (NF != 45) exit 1 }}\' {tmpDir}/{i+1}.dsa.bed;"
+		cmd += f"bgzip -f -l 2 {tmpDir}/{i+1}.dsa.bed; sleep 2; bgzip -t {tmpDir}/{i+1}.dsa.bed.gz"
+
+		if ( len(intervalsPerCPU[i]) == 0 ) : cmd = f"touch {tmpDir}/{i+1}.dsa.bed.gz; touch {tmpDir}/{i+1}.done"
 		commands[i] = (cmd, )
 
 	if (args.index is None or args.index == 1):
-		with open("%s/dsa/nfiles" % (tmpDir), "w") as iofile:
+		with open(f"{tmpDir}/nfiles", "w") as iofile:
 			iofile.write(str(njobs))
 
-	# execute dsa commands
-	print("Starting dsa calculation\n")
+	# Execute DSA commands
+	print("Starting DSA calculation\n")
 	if (args.index is None):
-		# multithread
+		# Multithread
 		with Pool(args.threads) as p:
 			p.starmap(runCommand, commands)
 	else:
-		# array execution
+		# Array execution
 		runCommand(commands[args.index - 1][0])
-	print("Completed dsa calculation\n")
+	print("Completed DSA calculation\n")
 
-# var section
+# Variant calling section
 if (args.subcommand == 'var'):
 	if (not os.path.isfile(tmpDir+'/dsa/args.json')):
 		sys.exit("\nMust run dsa subcommand prior to var\n")
