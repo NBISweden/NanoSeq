@@ -15,15 +15,9 @@ process VARIANT_CALLING {
 	path indexes
 
 	output:
-	// tuple  val(metaOut), path(duplex), path(index_duplex), path(normal), path( index_normal), emit : done
-	// path "var/${ii}.done"
-	// path "var/${ii}.var"
-	// path "var/${ii}.cov.bed.gz"
-	// path "var/${ii}.discarded_var"
-	// path 'var/nfiles' optional true
-	// path 'var/args.json' optional true
+	tuple val(meta), path(crams), path("${meta.jobindex}.var"), path("${meta.jobindex}.cov.bed.gz"), path("${meta.jobindex}.discarded_var"), emit: ch_variant_calling
 
-	script :
+	script:
 	"""
 
 	# Rather than require the dsa nfiles (no longer created), get the value directly from the parameter
