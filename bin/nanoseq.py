@@ -943,7 +943,7 @@ if (args.subcommand == 'indel'):
 			# Placeholder files
 			placeholder_cmds = [
 			f"touch {tmpDir}/{index+1}.indel.bed.gz",
-			f"touch {tmpDir}/{index+1}.indel.vcf.gz".
+			f"touch {tmpDir}/{index+1}.indel.vcf.gz",
 			f"touch {tmpDir}/{index+1}.indel.filtered.vcf.gz",
 			f"touch {tmpDir}/{index+1}.indel.filtered.vcf.gz.tbi"
 			]
@@ -958,13 +958,11 @@ if (args.subcommand == 'indel'):
 # Post section
 
 if (args.subcommand == 'post'):
-	if (os.path.isfile(tmpDir+'/post/1.done')):
-		sys.exit(0)
 	if (args.index is not None and args.index > 1):
 		print("\nWarning can only use 1 job of array\n")
 		sys.exit(0)
 
-	# check dsa
+	# Check DSA
 	if (not os.path.isfile(tmpDir+'/dsa/nfiles')):
 		sys.exit(tmpDir+'/dsa/nfiles not found!\n')
 	else:
@@ -977,7 +975,7 @@ if (args.subcommand == 'post'):
 		if (len(glob.glob(tmpDir+"/dsa/%s.dsa.bed.gz" % (i+1))) != 1):
 			sys.exit("\ndsa job %s did not complete correctly\n" % (i+1))
 
-	# check var
+	# Check variant calling
 	did_var = False
 	if (os.path.isfile(tmpDir+'/var/nfiles')):
 		did_var = True
@@ -993,7 +991,7 @@ if (args.subcommand == 'post'):
 			if (len(glob.glob(tmpDir+"/var/%s.cov.bed.gz" % (i+1))) != 1):
 				sys.exit("\nvar job %s did not complete correctly\n" % (i+1))
 
-	# check indel
+	# Check indel
 	did_indel = False
 	if (os.path.isfile(tmpDir+'/indel/nfiles')):
 		did_indel = True
@@ -1054,7 +1052,7 @@ if (args.subcommand == 'post'):
 								'dplxCQrevC,dplxCQrevG,dplxCQrevT,bulkForwardTotal,bulkReverseTotal,'
 								'dplxfwdTotal,dplxrevTotal,left,right,qpos,mismatch,ismasked,dplxBarcode\n')
 
-		# wirte body
+		#  Write body
 		for i in range(nfiles):
 			# Write variants
 			ifile = "%s/var/%s.var" % (tmpDir, i+1)
@@ -1115,7 +1113,7 @@ if (args.subcommand == 'post'):
 				for (i, ival) in enumerate(iline.rstrip('\n').split(',')):
 					var[fields[i]].append(ival)
 
-		#added so code will not break with older files
+		# Added so code will not break with older files
 		if ( len(var['dplxBarcode']) == 0 ) : var['dplxBarcode'] = nVariants * [ '' ]
 
 		header = vcfHeader(args)

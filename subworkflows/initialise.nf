@@ -63,6 +63,11 @@ workflow INITIALISE {
 				}
 			}
 
+			if (params.tri_nuc) {
+				if (!file(params.tri_nuc).exists()) {
+					error ("ERROR: The trinucleotide file does not exist ('${params.tri_nuc}').")
+			}
+
 		// Parse samplesheet
 
 			// Initialise empty set to store unique sample ids

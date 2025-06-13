@@ -23,6 +23,7 @@ Main workflow
 	include { DSA } from '../modules/dsa.nf'
 	include { VARIANT_CALLING } from '../modules/variant-calling.nf'
 	include { INDEL } from '../modules/indel.nf'
+	include { POST_PROCESS } from '../modules/post-process.nf'
 
 // Main workflow
 
@@ -132,9 +133,29 @@ Main workflow
 
 				INDEL (DSA.out.ch_dsa, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
+			// Stage variant and indel calling results together per sample
 
+				VARIANT_CALLING.out.ch_variant_calling
+					// Join channels on their metadata (sample, normalMethod & jobindex can vary)
+					.join(INDEL.out.ch_indel_calling)
+					.map { meta, crams, var1, var2, var3, indel1, indel2 ->
+						// Jobindex no longer required as chunks are to be grouped and this will prevent it
+						def metaNew = meta.clone()
+						metaNew.remove('jobindex')
+						[metaNew, crams, var1, var2, var3, indel1, indel2]
+					}
+					// Group by sample & normalMethod, when each sample finishes all constituent jobs
+					.groupTuple(size: params.jobs)
+					.map { meta, cramsList, var1, var2, var3, indel1, indel2 ->
+						// Take only the first set of CRAMS from the list per sample (avoid redundant file staging)
+						def crams = cramsList[0]
+						[meta, crams, var1, var2, var3, indel1, indel2]
+					}
+					.set { ch_variant_indel }
 
+			// Post-processing
 
+				POST_PROCESS (ch_variant_indel, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
 			// Report package versions
 
