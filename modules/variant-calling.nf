@@ -20,7 +20,7 @@ process VARIANT_CALLING {
 	script:
 	"""
 
-	# Rather than require the dsa nfiles (no longer created), get the value directly from the parameter
+	# Rather than require the dsa nfiles (no longer created), get the value from the parameter
 
 		echo ${params.jobs} > nfiles
 
