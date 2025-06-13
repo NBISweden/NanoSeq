@@ -238,11 +238,13 @@ LABEL org.opencontainers.image.description="Docker image to run NanoSeq source c
 RUN apt-get update -yq && \
 	apt-get install -yq --no-install-recommends \
 	dirmngr \
+	gfortran \
 	libcapture-tiny-perl \
 	libcurl4-openssl-dev \
 	libfile-which-perl \
 	libgsl-dev \
 	libperl5.26 \
+	libxml2 \
 	locales \
 	python3 \
 	software-properties-common \

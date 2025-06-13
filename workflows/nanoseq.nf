@@ -22,6 +22,7 @@ Main workflow
 	include { PARTITION } from '../modules/partition.nf'
 	include { DSA } from '../modules/dsa.nf'
 	include { VARIANT_CALLING } from '../modules/variant-calling.nf'
+	include { INDEL } from '../modules/indel.nf'
 
 // Main workflow
 
@@ -115,6 +116,8 @@ Main workflow
 
 				PARTITION (COVERAGE.out.ch_coverage, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
 
+			// Create indexes to split work over n jobs
+
 				jobIndexes = Channel.of(1..params.jobs)
 
 			// DSA
@@ -124,6 +127,11 @@ Main workflow
 			// Variant calling
 
 				VARIANT_CALLING (DSA.out.ch_dsa, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
+			// Indel calling
+
+				INDEL (DSA.out.ch_dsa, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
 
 
 

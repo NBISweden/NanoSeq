@@ -873,12 +873,14 @@ if (args.subcommand == 'var'):
 			print(
 				"\nWarning number of threads is larger than jobs specified for part (%s)\n" % njobs)
 
-	commands = [(None,)] * njobs
 
 	# Construct variantcaller commands
+	commands = [(None,)] * njobs
 	for i in range(njobs):
 		cmd = f"variantcaller -B {tmpDir}/{i+1}.dsa.bed.gz -U {tmpDir}/{i+1}.cov.bed -O {tmpDir}/{i+1}.var -D {tmpDir}/{i+1}.discarded_var -a {args.a} -b {args.b} -c {args.c} -d {args.d} -f {args.f} -i {args.i} -m {args.m} -n {args.n} -p {args.p} -q {args.q} -r {args.r} -v {args.v} -x {args.x} -z {args.z}"
 		commands[i] = (cmd, )
+
+	# TODO: add back in the check for empty files. See indel section where it's implemented for the specific index number (not in the loop).
 
 	# Execute variantcaller commands
 	print("Starting var calculation\n")
@@ -892,31 +894,15 @@ if (args.subcommand == 'var'):
 	print("Completed var calculation\n")
 
 
+# Indel section
 
-# indel section
 if (args.subcommand == 'indel'):
-	if (not os.path.isfile(tmpDir+'/dsa/args.json')):
-		sys.exit("\nMust run dsa subcommand prior to indel\n")
-	else:
-		with open(tmpDir+'/dsa/args.json') as iofile:
-			oargs = json.load(iofile)
+	with open(f"{tmpDir}/nfiles") as iofile:
+		njobs = int(iofile.readline())
 
-	if (not os.path.isfile(tmpDir+'/dsa/nfiles')):
-		sys.exit(tmpDir+'/dsa/nfiles not found!\n')
-	else:
-		with open(tmpDir+'/dsa/nfiles') as iofile:
-			nfiles = int(iofile.readline())
-	njobs = nfiles
-
-	for i in range(nfiles):
-		if (len(glob.glob(tmpDir+"/dsa/%s.done" % (i+1))) != 1):
-			sys.exit("\ndsa job %s did not complete correctly\n" % (i+1))
-		if (len(glob.glob(tmpDir+"/dsa/%s.dsa.bed.gz" % (i+1))) != 1):
-			sys.exit("\ndsa job %s did not complete correctly\n" % (i+1))
-
-	# make sure that number of jobs matches what was specified in part
+	# Ensure jobs matches number specified in partition
 	if (args.max_index is not None):
-		# array execution
+		# Array execution
 		if (args.max_index < njobs):
 			sys.exit(
 				"\nLSF array size must match number of jobs specified for part (%s)\n" % njobs)
@@ -925,7 +911,7 @@ if (args.subcommand == 'indel'):
 				"\nWarning specified LSF array size is larger than jobs specified for part (%s)\n" % njobs)
 			sys.exit(0)
 	else:
-		# multithread
+		# Multithread
 		if (args.threads < njobs):
 			sys.exit(
 				"\nNumber of threads must match number of jobs specified for part (%s)\n" % njobs)
@@ -933,45 +919,44 @@ if (args.subcommand == 'indel'):
 			print(
 				"\nWarning number of threads is larger than jobs specified for part (%s)\n" % njobs)
 
+	# Construct the indel commands (3 steps)
 	commands = [(None, )] * njobs
 	for i in range(njobs):
-		# check for restarts
-		if (os.path.isfile("%s/indel/%s.done" % (tmpDir, i+1)) and
-				os.path.isfile("%s/indel/%s.indel.filtered.vcf.gz" % (tmpDir, i+1))):
-			continue
 
-		# construct the indel commands ( 3 steps)
-		cmd = "indelCaller_step1.pl -o %s -rb %s -t3 %s -t5 %s -mc %s -vaf %s -a %s -c %s %s ;"\
-			% ("%s/indel/%s.indel.bed.gz" % (tmpDir, i+1), args.rb, args.t3, args.t5, args.z, args.v, args.a, args.c,
-			"%s/dsa/%s.dsa.bed.gz" % (tmpDir, i+1))
-		cmd += "indelCaller_step2.pl -t -o %s -r %s -b %s %s ;"\
-			% ("%s/indel/%s.indel" % (tmpDir, i+1), args.ref, args.duplex,
-			"%s/indel/%s.indel.bed.gz" % (tmpDir, i+1))
-		cmd += "indelCaller_step3.R %s %s %s %s;"\
-			% (args.ref, "%s/indel/%s.indel.vcf.gz" % (tmpDir, i+1), args.normal, args.v)
-		cmd += "touch %s/indel/%s.done" % (tmpDir, i+1)
-		if ( os.stat("%s/dsa/%s.dsa.bed.gz"%(tmpDir, i+1)).st_size == 0) :
-			cmd = "touch %s/indel/%s.indel.bed.gz; touch %s/indel/%s.indel.vcf.gz;" \
-				"touch %s/indel/%s.indel.filtered.vcf.gz; touch %s/indel/%s.indel.filtered.vcf.gz.tbi;" \
-				"touch %s/indel/%s.done" % (tmpDir, i+1,tmpDir, i+1,tmpDir, i+1,tmpDir, i+1,tmpDir, i+1)
+		cmd = f"indelCaller_step1.pl -o {tmpDir}/{i+1}.indel.bed.gz -rb {args.rb} -t3 {args.t3} -t5 {args.t5} -mc {args.z} -vaf {args.v} -a {args.a} -c {args.c} {tmpDir}/{i+1}.dsa.bed.gz ;"
+		cmd += f"indelCaller_step2.pl -t -o {tmpDir}/{i+1}.indel -r {args.ref} -b {args.duplex} {tmpDir}/{i+1}.indel.bed.gz ;"
+		cmd += f"indelCaller_step3.R {args.ref} {tmpDir}/{i+1}.indel.vcf.gz {args.normal} {args.v}"
 		commands[i] = (cmd, )
 
-	if (args.index is None or args.index == 1):
-		with open("%s/indel/nfiles" % (tmpDir), "w") as iofile:
-			iofile.write(str(njobs))
+	# Execute indel caller commands
 
-	# execute indel caller commands
 	print("Starting indel calculation\n")
 	if (args.index is None):
-		# multithread
+		# Multithread
 		with Pool(args.threads) as p:
 			p.starmap(runCommand, commands)
 	else:
-		# array execution
-		runCommand(commands[args.index - 1][0])
+		# Array execution
+		index = args.index - 1 # Adjust index to python basing
+		# Check if file size is zero & create placeholder files if yes (adjust back for the filename). Moved from for loop to function only at specific index number. TODO: not yet implemented for VAR, which originally had a similar operation.
+		if os.stat(f"{tmpDir}/{index+1}.dsa.bed.gz").st_size == 0:
+			# Placeholder files
+			placeholder_cmds = [
+			f"touch {tmpDir}/{index+1}.indel.bed.gz",
+			f"touch {tmpDir}/{index+1}.indel.vcf.gz".
+			f"touch {tmpDir}/{index+1}.indel.filtered.vcf.gz",
+			f"touch {tmpDir}/{index+1}.indel.filtered.vcf.gz.tbi"
+			]
+			for cmd in placeholder_cmds:
+				runCommand(cmd)
+		else:
+			runCommand(commands[index][0])
+
 	print("Completed indel calculation\n")
 
-# post section
+
+# Post section
+
 if (args.subcommand == 'post'):
 	if (os.path.isfile(tmpDir+'/post/1.done')):
 		sys.exit(0)
