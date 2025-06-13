@@ -962,200 +962,155 @@ if (args.subcommand == 'post'):
 		print("\nWarning can only use 1 job of array\n")
 		sys.exit(0)
 
-	# Check DSA
-	if (not os.path.isfile(tmpDir+'/dsa/nfiles')):
-		sys.exit(tmpDir+'/dsa/nfiles not found!\n')
-	else:
-		with open(tmpDir+'/dsa/nfiles') as iofile:
-			nfiles = int(iofile.readline())
+	with open(f"{tmpDir}/nfiles") as iofile:
+		nfiles = int(iofile.readline())
+
+	# Generate CSV files
+	print("\nGenerating CSV files for var\n")
+	csvFiles = ['Coverage', 'CallVsQpos', 'PyrVsMask',
+				'ReadBundles', 'Burdens', 'Variants', 'DiscardedVariants', 'Mismatches']
+	csvIO = {}
+
+	for ifile in csvFiles:
+		csvIO[ifile] = open(f"{tmpDir}/{ifile.lower()}.csv", 'w')
+
+	# write headers
+	csvIO['Coverage'].write('count\n')
+	csvIO['CallVsQpos'].write('base,qpos,ismasked,count\n')
+	csvIO['PyrVsMask'].write('pyrcontext,ismasked,count\n')
+	csvIO['ReadBundles'].write('fwd,rev,ismasked,isvariant,count\n')
+	csvIO['Burdens'].write('ismasked,isvariant,count\n')
+	csvIO['Variants'].write('chrom,chromStart,context,commonSNP,'
+							'shearwater,bulkASXS,bulkNM,bulkForwardA,bulkForwardC,bulkForwardG,'
+							'bulkForwardT,bulkForwardIndel,bulkReverseA,bulkReverseC,bulkReverseG,'
+							'bulkReverseT,bulkReverseIndel,dplxBreakpointBeg,dplxBreakpointEnd,'
+							'bundleType,dplxASXS,dplxCLIP,dplxNM,dplxfwdA,dplxfwdC,dplxfwdG,dplxfwdT,'
+							'dplxfwdIndel,dplxrevA,dplxrevC,dplxrevG,dplxrevT,dplxrevIndel,'
+							'dplxCQfwdA,dplxCQfwdC,dplxCQfwdG,dplxCQfwdT,dplxCQrevA,'
+							'dplxCQrevC,dplxCQrevG,dplxCQrevT,bulkForwardTotal,bulkReverseTotal,'
+							'dplxfwdTotal,dplxrevTotal,left,right,qpos,call,isvariant,pyrcontext,'
+							'stdcontext,pyrsub,stdsub,ismasked,dplxBarcode\n')
+	csvIO['DiscardedVariants'].write('chrom,chromStart,context,commonSNP,'
+							'shearwater,bulkASXS,bulkNM,bulkForwardA,bulkForwardC,bulkForwardG,'
+							'bulkForwardT,bulkForwardIndel,bulkReverseA,bulkReverseC,bulkReverseG,'
+							'bulkReverseT,bulkReverseIndel,dplxBreakpointBeg,dplxBreakpointEnd,'
+							'bundleType,dplxASXS,dplxCLIP,dplxNM,dplxfwdA,dplxfwdC,dplxfwdG,dplxfwdT,'
+							'dplxfwdIndel,dplxrevA,dplxrevC,dplxrevG,dplxrevT,dplxrevIndel,'
+							'dplxCQfwdA,dplxCQfwdC,dplxCQfwdG,dplxCQfwdT,dplxCQrevA,'
+							'dplxCQrevC,dplxCQrevG,dplxCQrevT,bulkForwardTotal,bulkReverseTotal,'
+							'dplxfwdTotal,dplxrevTotal,left,right,qpos,call,isvariant,pyrcontext,'
+							'stdcontext,pyrsub,stdsub,ismasked,dplxBarcode,'
+							'dplx_clip_filter,alignment_score_filter,mismatch_filter,matched_normal_filter,'
+							'duplex_filter,consensus_base_quality_filter,indel_filter,five_prime_trim_filter,'
+							'three_prime_trim_filter,proper_pair_filter,vaf_filter\n')
+	csvIO['Mismatches'].write('chrom,chromStart,context,commonSNP,'
+							'shearwater,bulkASXS,bulkNM,bulkForwardA,bulkForwardC,bulkForwardG,'
+							'bulkForwardT,bulkForwardIndel,bulkReverseA,bulkReverseC,bulkReverseG,'
+							'bulkReverseT,bulkReverseIndel,dplxBreakpointBeg,dplxBreakpointEnd,'
+							'dplxASXS,dplxCLIP,dplxNM,dplxfwdA,dplxfwdC,dplxfwdG,dplxfwdT,'
+							'dplxfwdIndel,dplxrevA,dplxrevC,dplxrevG,dplxrevT,dplxrevIndel,'
+							'dplxCQfwdA,dplxCQfwdC,dplxCQfwdG,dplxCQfwdT,dplxCQrevA,'
+							'dplxCQrevC,dplxCQrevG,dplxCQrevT,bulkForwardTotal,bulkReverseTotal,'
+							'dplxfwdTotal,dplxrevTotal,left,right,qpos,mismatch,ismasked,dplxBarcode\n')
+
+	#  Write body
 
 	for i in range(nfiles):
-		if (len(glob.glob(tmpDir+"/dsa/%s.done" % (i+1))) != 1):
-			sys.exit("\ndsa job %s did not complete correctly\n" % (i+1))
-		if (len(glob.glob(tmpDir+"/dsa/%s.dsa.bed.gz" % (i+1))) != 1):
-			sys.exit("\ndsa job %s did not complete correctly\n" % (i+1))
+		# Write variants
+		ifile = f"{tmpDir}/{i+1}.var"
+		for row in open(ifile, 'r'):
+			if row[0] == '#':
+				continue
+			arow = row.strip().split('\t')
+			if csvIO.get(arow[0], None):
+				csvIO[arow[0]].write(f"{','.join(arow[1:])}\n")
 
-	# Check variant calling
-	did_var = False
-	if (os.path.isfile(tmpDir+'/var/nfiles')):
-		did_var = True
-		with open(tmpDir+'/dsa/nfiles') as iofile:
-			nfiles = int(iofile.readline())
-		for i in range(nfiles):
-			if (len(glob.glob(tmpDir+"/var/%s.done" % (i+1))) != 1):
-				sys.exit("\nvar job %s did not complete correctly\n" % (i+1))
-			if (len(glob.glob(tmpDir+"/var/%s.var" % (i+1))) != 1):
-				sys.exit("\nvar job %s did not complete correctly\n" % (i+1))
-			if (len(glob.glob(tmpDir+"/var/%s.discarded_var" % (i+1))) != 1):
-				sys.exit("\nvar job %s did not complete correctly\n" % (i+1))
-			if (len(glob.glob(tmpDir+"/var/%s.cov.bed.gz" % (i+1))) != 1):
-				sys.exit("\nvar job %s did not complete correctly\n" % (i+1))
+		# Write discarded variants
+		dfile = f"{tmpDir}/{i+1}.discarded_var"
+		for row in open(dfile, 'r'):
+			if (row[0] == '#'):
+				continue
+			arow = row.strip().split('\t')
+			if csvIO.get(arow[0], None):
+				csvIO[arow[0]].write('%s\n' % ','.join(arow[1:]))
 
-	# Check indel
-	did_indel = False
-	if (os.path.isfile(tmpDir+'/indel/nfiles')):
-		did_indel = True
-		with open(tmpDir+'/indel/nfiles') as iofile:
-			nfiles = int(iofile.readline())
-		for i in range(nfiles):
-			if (len(glob.glob(tmpDir+"/indel/%s.done" % (i+1))) != 1):
-				sys.exit("\nindel job %s did not complete correctly\n" % (i+1))
-			if (len(glob.glob(tmpDir+"/indel/%s.indel.filtered.vcf.gz" % (i+1))) != 1):
-				sys.exit("\nindel job %s did not complete correctly\n" % (i+1))
+	for ifile in csvIO.values():
+		ifile.close()
 
-	if (did_var):
-		# generate csv files
-		print("\nGenerating CSV files for var\n")
-		csvFiles = ['Coverage', 'CallVsQpos', 'PyrVsMask',
-					'ReadBundles', 'Burdens', 'Variants', 'DiscardedVariants', 'Mismatches']
-		csvIO = {}
-		for ifile in csvFiles:
-			csvIO[ifile] = open('%s/post/%s.csv' %
-								(tmpDir, ifile.lower()), 'w')
-
-		# write headers
-		csvIO['Coverage'].write('count\n')
-		csvIO['CallVsQpos'].write('base,qpos,ismasked,count\n')
-		csvIO['PyrVsMask'].write('pyrcontext,ismasked,count\n')
-		csvIO['ReadBundles'].write('fwd,rev,ismasked,isvariant,count\n')
-		csvIO['Burdens'].write('ismasked,isvariant,count\n')
-		csvIO['Variants'].write('chrom,chromStart,context,commonSNP,'
-								'shearwater,bulkASXS,bulkNM,bulkForwardA,bulkForwardC,bulkForwardG,'
-								'bulkForwardT,bulkForwardIndel,bulkReverseA,bulkReverseC,bulkReverseG,'
-								'bulkReverseT,bulkReverseIndel,dplxBreakpointBeg,dplxBreakpointEnd,'
-								'bundleType,dplxASXS,dplxCLIP,dplxNM,dplxfwdA,dplxfwdC,dplxfwdG,dplxfwdT,'
-								'dplxfwdIndel,dplxrevA,dplxrevC,dplxrevG,dplxrevT,dplxrevIndel,'
-								'dplxCQfwdA,dplxCQfwdC,dplxCQfwdG,dplxCQfwdT,dplxCQrevA,'
-								'dplxCQrevC,dplxCQrevG,dplxCQrevT,bulkForwardTotal,bulkReverseTotal,'
-								'dplxfwdTotal,dplxrevTotal,left,right,qpos,call,isvariant,pyrcontext,'
-								'stdcontext,pyrsub,stdsub,ismasked,dplxBarcode\n')
-		csvIO['DiscardedVariants'].write('chrom,chromStart,context,commonSNP,'
-								'shearwater,bulkASXS,bulkNM,bulkForwardA,bulkForwardC,bulkForwardG,'
-								'bulkForwardT,bulkForwardIndel,bulkReverseA,bulkReverseC,bulkReverseG,'
-								'bulkReverseT,bulkReverseIndel,dplxBreakpointBeg,dplxBreakpointEnd,'
-								'bundleType,dplxASXS,dplxCLIP,dplxNM,dplxfwdA,dplxfwdC,dplxfwdG,dplxfwdT,'
-								'dplxfwdIndel,dplxrevA,dplxrevC,dplxrevG,dplxrevT,dplxrevIndel,'
-								'dplxCQfwdA,dplxCQfwdC,dplxCQfwdG,dplxCQfwdT,dplxCQrevA,'
-								'dplxCQrevC,dplxCQrevG,dplxCQrevT,bulkForwardTotal,bulkReverseTotal,'
-								'dplxfwdTotal,dplxrevTotal,left,right,qpos,call,isvariant,pyrcontext,'
-								'stdcontext,pyrsub,stdsub,ismasked,dplxBarcode,'
-								'dplx_clip_filter,alignment_score_filter,mismatch_filter,matched_normal_filter,'
-								'duplex_filter,consensus_base_quality_filter,indel_filter,five_prime_trim_filter,'
-								'three_prime_trim_filter,proper_pair_filter,vaf_filter\n')
-		csvIO['Mismatches'].write('chrom,chromStart,context,commonSNP,'
-								'shearwater,bulkASXS,bulkNM,bulkForwardA,bulkForwardC,bulkForwardG,'
-								'bulkForwardT,bulkForwardIndel,bulkReverseA,bulkReverseC,bulkReverseG,'
-								'bulkReverseT,bulkReverseIndel,dplxBreakpointBeg,dplxBreakpointEnd,'
-								'dplxASXS,dplxCLIP,dplxNM,dplxfwdA,dplxfwdC,dplxfwdG,dplxfwdT,'
-								'dplxfwdIndel,dplxrevA,dplxrevC,dplxrevG,dplxrevT,dplxrevIndel,'
-								'dplxCQfwdA,dplxCQfwdC,dplxCQfwdG,dplxCQfwdT,dplxCQrevA,'
-								'dplxCQrevC,dplxCQrevG,dplxCQrevT,bulkForwardTotal,bulkReverseTotal,'
-								'dplxfwdTotal,dplxrevTotal,left,right,qpos,mismatch,ismasked,dplxBarcode\n')
-
-		#  Write body
-		for i in range(nfiles):
-			# Write variants
-			ifile = "%s/var/%s.var" % (tmpDir, i+1)
-			for row in open(ifile, 'r'):
-				if (row[0] == '#'):
-					continue
-				arow = row.strip().split('\t')
-				if csvIO.get(arow[0], None):
-					csvIO[arow[0]].write('%s\n' % ','.join(arow[1:]))
-			
-			# Write discarded variants
-			dfile = "%s/var/%s.discarded_var" % (tmpDir, i+1)
-			for row in open(dfile, 'r'):
-				if (row[0] == '#'):
-					continue
-				arow = row.strip().split('\t')
-				if csvIO.get(arow[0], None):
-					csvIO[arow[0]].write('%s\n' % ','.join(arow[1:]))
-
-
-		for ifile in csvIO.values():
-			ifile.close()
-
-		print("\nMerge coverage files for var\n")
-		# merge coverage files
-		outFile = "%s/post/%s.cov.bed" % (tmpDir, args.name)
-		cmd = "rm -f %s;" % (outFile)
-		for i in range(nfiles):
-			ifile = "%s/var/%s.cov.bed.gz" % (tmpDir, i+1)
-			if ( os.stat(ifile).st_size == 0 ) : continue
-			cmd += "bgzip -dc %s >> %s ;" % (ifile, outFile)
-		cmd += "bgzip -@ %s -f %s; sleep 3; bgzip -@ %s -t %s.gz ;" % (
-			args.threads, outFile, args.threads, outFile)
-		cmd += "tabix -f %s.gz" % (outFile)
-		runCommand(cmd)
-
-		print("\nCompute summaries for var\n")
-		# do the summary
-		cmd = "variantcaller.R %s/post/ > %s/post/summary.txt" % (
-			tmpDir, tmpDir)
-		runCommand(cmd)
-
-		cmd = "nanoseq_results_plotter.R %s/post %s/post/%s %s" % (
-			tmpDir, tmpDir, args.name, args.triNuc or "")
-		runCommand(cmd)
-
-		print("\nGenerate vcf file from variants.csv\n")
-
-		var = {}
-		nVariants = 0
-		with open("%s/post/variants.csv" % tmpDir, 'r') as iofile:
-			iline = iofile.readline().rstrip('\n')
-			fields = iline.split(',')
-			for ifield in fields:
-				var[ifield] = []
-			for iline in iofile:
-				nVariants += 1
-				for (i, ival) in enumerate(iline.rstrip('\n').split(',')):
-					var[fields[i]].append(ival)
-
-		# Added so code will not break with older files
-		if ( len(var['dplxBarcode']) == 0 ) : var['dplxBarcode'] = nVariants * [ '' ]
-
-		header = vcfHeader(args)
-
-		with open("%s/post/%s.muts.vcf" % (tmpDir, args.name), "w") as iofile:
-			iofile.write(header)
-			for i in range(nVariants):
-				iline = "%s\t%s\t%s\t%s\t%s\t.\t" % \
-					(var['chrom'][i], int(var['chromStart'][i]) +
-					1, '.', var['context'][i][1], var['call'][i])
-				ifilter = "PASS"
-				if (var['shearwater'][i] == '1'):
-					ifilter = "shearwater"
-				if (var['commonSNP'][i] == '1'):
-					ifilter = "dbsnp"
-				iline += "%s\t" % ifilter
-				iline += "BTAG=%s;BBEG=%s;BEND=%s;TRI=%s;QPOS=%s;DEPTH_FWD=%s;DEPTH_REV=%s;DEPTH_NORM_FWD=%s;DEPTH_NORM_REV=%s;DPLX_ASXS=%s;DPLX_CLIP=%s;DPLX_NM=%s;BULK_ASXS=%s;BULK_NM=%s\n" % \
-					(var['dplxBarcode'][i], var['dplxBreakpointBeg'][i], var['dplxBreakpointEnd'][i], var['pyrsub'][i],
-					var['qpos'][i], var['dplxfwdTotal'][i], var['dplxrevTotal'][i], var['bulkForwardTotal'][i],
-					var['bulkReverseTotal'][i], var['dplxASXS'][i], var['dplxCLIP'][i], var['dplxNM'][i], var['bulkASXS'][i],
-					var['bulkNM'][i])
-				iofile.write(iline)
-		cmd = "bgzip -@ %s -f %s/post/%s.muts.vcf; sleep 3; bgzip -@ %s -t %s/post/%s.muts.vcf.gz;" % (
-			args.threads, tmpDir, args.name, args.threads, tmpDir, args.name)
-		cmd += "bcftools index -t -f %s/post/%s.muts.vcf.gz " % (
-			tmpDir, args.name)
-		runCommand(cmd)
-
-	if (did_indel):
-		print("\nMerging vcf files for indel\n")
-		vcf2Merge = []
-		for i in range(nfiles):
-			ifile = tmpDir+"/indel/%s.indel.filtered.vcf.gz" % (i+1)
-			if ( os.stat(ifile).st_size == 0 ) : continue
-			vcf2Merge.append(ifile)
-		cmd = "cp %s %s/indel/merged.vcf.gz ;" % (vcf2Merge.pop(0), tmpDir)
-		for ifile in vcf2Merge[0:]:
-			cmd += "bcftools concat --no-version -Oz -o %s/indel/tmp.xxx.vcf.gz %s/indel/merged.vcf.gz %s; mv %s/indel/tmp.xxx.vcf.gz %s/indel/merged.vcf.gz; " % (tmpDir, tmpDir, ifile, tmpDir, tmpDir)
-		cmd += "bcftools sort -Oz -o %s/post/%s.indel.vcf.gz %s/indel/merged.vcf.gz;" % (tmpDir, args.name, tmpDir)
-		cmd += "bcftools index -t -f %s/post/%s.indel.vcf.gz " % (
-			tmpDir, args.name)
-		runCommand(cmd)
-
-	cmd = "touch %s/post/1.done" % (tmpDir)
+	# Merge coverage files
+	print("\nMerge coverage files for var\n")
+	outFile = f"{tmpDir}/{args.name}.cov.bed"
+	cmd = f"rm -f {outFile};"
+	for i in range(nfiles):
+		ifile = f"{tmpDir}/{i+1}.cov.bed.gz"
+		if ( os.stat(ifile).st_size == 0 ) : continue
+		cmd += f"bgzip -dc {ifile} >> {outFile} ;"
+	cmd += f"bgzip -@ {args.threads} -f {outFile}; sleep 3; bgzip -@ {args.threads} -t {outFile}.gz;"
+	cmd += f"tabix -f {outFile}.gz"
 	runCommand(cmd)
+
+	# Make summary
+	print("\nCompute summaries for var\n")
+	cmd = f"variantcaller.R {tmpDir} > {tmpDir}/summary.txt"
+	runCommand(cmd)
+
+	cmd = f"nanoseq_results_plotter.R {tmpDir} {tmpDir}/{args.name} {args.triNuc or ''}"
+	runCommand(cmd)
+
+	print("\nGenerate vcf file from variants.csv\n")
+
+	var = {}
+	nVariants = 0
+	with open(f"{tmpDir}/variants.csv", 'r') as iofile:
+		iline = iofile.readline().rstrip('\n')
+		fields = iline.split(',')
+		for ifield in fields:
+			var[ifield] = []
+		for iline in iofile:
+			nVariants += 1
+			for (i, ival) in enumerate(iline.rstrip('\n').split(',')):
+				var[fields[i]].append(ival)
+
+	# Added so code will not break with older files
+	if ( len(var['dplxBarcode']) == 0 ) : var['dplxBarcode'] = nVariants * [ '' ]
+
+	header = vcfHeader(args)
+
+	with open(f"{tmpDir}/{args.name}.muts.vcf", "w") as iofile:
+		iofile.write(header)
+		for i in range(nVariants):
+			iline = "%s\t%s\t%s\t%s\t%s\t.\t" % \
+				(var['chrom'][i], int(var['chromStart'][i]) +
+				1, '.', var['context'][i][1], var['call'][i])
+			ifilter = "PASS"
+			if (var['shearwater'][i] == '1'):
+				ifilter = "shearwater"
+			if (var['commonSNP'][i] == '1'):
+				ifilter = "dbsnp"
+			iline += "%s\t" % ifilter
+			iline += "BTAG=%s;BBEG=%s;BEND=%s;TRI=%s;QPOS=%s;DEPTH_FWD=%s;DEPTH_REV=%s;DEPTH_NORM_FWD=%s;DEPTH_NORM_REV=%s;DPLX_ASXS=%s;DPLX_CLIP=%s;DPLX_NM=%s;BULK_ASXS=%s;BULK_NM=%s\n" % \
+				(var['dplxBarcode'][i], var['dplxBreakpointBeg'][i], var['dplxBreakpointEnd'][i], var['pyrsub'][i],
+				var['qpos'][i], var['dplxfwdTotal'][i], var['dplxrevTotal'][i], var['bulkForwardTotal'][i],
+				var['bulkReverseTotal'][i], var['dplxASXS'][i], var['dplxCLIP'][i], var['dplxNM'][i], var['bulkASXS'][i],
+				var['bulkNM'][i])
+			iofile.write(iline)
+
+	cmd = f"bgzip -@ {args.threads} -f {tmpDir}/{args.name}.muts.vcf; sleep 3; bgzip -@ {args.threads} -t {tmpDir}/{args.name}.muts.vcf.gz;"
+	cmd += f"bcftools index -t -f {tmpDir}/{args.name}.muts.vcf.gz"
+
+	runCommand(cmd)
+
+	print("\nMerging vcf files for indel\n")
+	vcf2Merge = []
+	for i in range(nfiles):
+		ifile = f"{tmpDir}/{i+1}.indel.filtered.vcf.gz"
+		if ( os.stat(ifile).st_size == 0 ) : continue
+		vcf2Merge.append(ifile)
+	cmd = f"cp {vcf2Merge.pop(0)} {tmpDir}/merged.vcf.gz;"
+	for ifile in vcf2Merge[0:]:
+		cmd += f"bcftools concat --no-version -Oz -o {tmpDir}/tmp.xxx.vcf.gz {tmpDir}/merged.vcf.gz {ifile}; mv {tmpDir}/tmp.xxx.vcf.gz {tmpDir}/merged.vcf.gz;"
+	cmd += f"bcftools sort -Oz -o {tmpDir}/{args.name}.indel.vcf.gz {tmpDir}/merged.vcf.gz;"
+	cmd += f"bcftools index -t -f {tmpDir}/{args.name}.indel.vcf.gz"
+	runCommand(cmd)
+
+	print("\nCompleted post processing\n")

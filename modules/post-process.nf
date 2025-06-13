@@ -13,7 +13,9 @@ process POST_PROCESS {
 	path indexes
 
 	output:
-	// path("versions.yml"), emit: versions
+	//FIXME:	next job, outputs from this, and back to last nextflow main processes
+
+
 	// tuple val(meta), path("post/${meta.id}.muts.vcf.gz"), path( "post/${meta.id}.muts.vcf.gz.tbi"), 
 	// 	path("post/${meta.id}.indel.vcf.gz"), path( "post/${meta.id}.indel.vcf.gz.tbi"), path("post/${meta.id}.cov.bed.gz"), 
 	// 	path( "post/${meta.id}.cov.bed.gz.tbi"), emit: results
