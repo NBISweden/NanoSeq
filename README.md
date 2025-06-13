@@ -4,7 +4,7 @@
 # NanoSeq
 
 >[!NOTE]
->`NBISweden/NanoSeq` was detached from a fork of `cancerit/NanoSeq` ([commit 31e34bf](https://github.com/fa8sanger/NanoSeq/tree/31e34bf5dc30165e2ae28c027f6aead3a8970410)), itself a fork of the [original NanoSeq project](https://github.com/cancerit/NanoSeq).<br><br>
+>`NBISweden/NanoSeq` was forked and subsequently detached from `fa8sanger/NanoSeq` ([commit 31e34bf](https://github.com/fa8sanger/NanoSeq/tree/31e34bf5dc30165e2ae28c027f6aead3a8970410)), itself a fork of the [original NanoSeq project](https://github.com/cancerit/NanoSeq).<br><br>
 >The original workflow codebase was released under the GNU AFFERO GENERAL PUBLIC LICENSE, as is this modified version.<br><br>
 >Credit for the original work goes solely to the NanoSeq authors.<br><br>
 >Modifications are summarised in `CHANGELOG.md`.<br><br>
