@@ -145,7 +145,7 @@ Main workflow
 						[metaNew, crams, var1, var2, var3, indel1, indel2]
 					}
 					// Group by variable metadata (sample & normalMethod), when each sample finishes all constituent jobs
-					.groupTuple(size: params.jobs) // N = jobs due to join operation above (i.e. not jobs * 2)
+					.groupTuple(size: params.jobs, sort: 'hash') // N = jobs due to join operation above (i.e. not jobs * 2), hash sort to ensure deterministic order for resume
 					.map { meta, cramsList, var1, var2, var3, indel1, indel2 ->
 						// Take only the first set of CRAMS from the list per sample (avoid redundant file staging)
 						def crams = cramsList[0]
