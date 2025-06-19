@@ -1,13 +1,5 @@
 # Changelog
 
-## [Unreleased]
-
-### Planned
-
-
-<!-- Release history -->
-
-
 ## [1.0.0-NBIS] - TODO: DATE
 
 ### Base dependencies
@@ -15,6 +7,10 @@
 - `pixi` is now the only dependency for users to install. `pixi` handles further basic dependencies, i.e. `Nextflow` and `Apptainer` (+ their dependencies). `Apptainer` handles module dependencies via container images
 
 ### Changed or removed
+
+#### Readme
+
+- Updated to reflect changes to codebase (instllation, usage, etc.)
 
 #### Installation & dependencies
 
@@ -29,18 +25,13 @@
 
 #### Tool versions
 
-- Tool versions have been updated in many cases
+- Tool versions have been updated in some cases
 
 #### Samplesheet input
 
-- The original workflow asked users to edit the column headers of their samplesheet depending on whether `FASTQ`, `CRAM`, or `BAM` was provided as input. This prevented mixing of input formats, and added potential for user error
-- Refactored to a fixed samplesheet layout, and added two columns (`input_format`, `normal_method`), in which users state the file type provided per sample, and the method used for sequencing the matched normal sample (duplex or standard)
-- The initialisation subworkflow now loads the samplesheet and validates essential information (unique sample ids, valid input formats, and matched normal sequencing method). If passing checks, file paths are added according to the input type. This is emitted as a channel to the main workflow, where it is branched into individual channels for each input type. The existing logic that allowed parallel mapping for normal and duplex read-pairs has been maintained via an equivalent multimap operation
-- Users can now mix input types in a single run
-
-#### Support for unindexed bam/cram files
-
-- Removed support for unindexed bam/cram file inputs as these processes seem to rely on internal Sanger perl libraries and scripts
+- The original workflow asked users to edit the column headers of their samplesheet depending on whether `FASTQ`, `CRAM`, or `BAM` was provided as input
+- Changed to a fixed samplesheet layout and FASTQ input. Added column (`normal_method`): the method used for sequencing the matched normal sample (duplex or standard)
+- The initialisation subworkflow now loads the samplesheet and validates essential information.
 
 #### Reference genome & indexes
 
@@ -56,28 +47,23 @@
 
 - Package version reporting within process script blocks was replaced with a topic channel, published in the same way as other outputs
 
-#### Overall layout
+#### Overall layout + Nextflow refactor
 
 - Repository layout has been simplified and modularised
 - Entry workflow now defined in `main.nf`
 - Main workflow now defined in `workflows/nanoseq.nf`
 - Initialisation subworkflow defined in `subworkflows/initialise.nf`
 - Processes are now one per file and found in `modules`
-- Other named workflows have been removed and reimplemented as modules/processes
+- Other named workflows have been removed and reimplemented as processes
 - Assorted scripts are now found in `bin`
 - Basic nextflow config now found in `nextflow.config`
-- Parameters are now exclusively defined in `conf/parameters.config`, these have been reorganised and annotated
+- Parameters are now exclusively defined in `conf/parameters.config`, these have been renamed
 - Additional profiles have been defined, and all are now found in `conf/profiles.config`
 - any `ext.arg` variables are now found in `conf/modules.config`
 - Removed redundant configs/deprecated DSL statements
-
-#### Hard coding/system dependency
-
 - Where found, hard coding has been removed and replaced with Nextflow variables or parameters
 - Where system paths were used, these have been replaced to be system agnostic
-
-
-
+- Nextflow code has been refactored to improve readability and maintainability
 
 
 <!-- Pre-fork release history -->
