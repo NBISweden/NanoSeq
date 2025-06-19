@@ -19,6 +19,8 @@ process POST_PROCESS {
 	path("*.csv"), emit: ch_csv
 	path("*.tsv"), emit: ch_tsv, optional: true
 	path("*.pdf"), emit: ch_pdf, optional: true
+	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
+	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 
 	script:
 	def args = task.ext.args ?: ''

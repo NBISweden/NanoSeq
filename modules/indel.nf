@@ -16,6 +16,8 @@ process INDEL {
 
 	output:
 	tuple val(meta), path("${meta.jobindex}.indel.filtered.vcf.gz"), path("${meta.jobindex}.indel.filtered.vcf.gz.tbi"), emit: ch_indel_calling
+	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
+	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 
 	script:
 	"""
