@@ -3,7 +3,7 @@
 shopt -s extglob
 
 rm ./data/genome/genome.fa.*
-rm ./data/genome/NC_037638.1_subset.fa.*
+rm ./data/test/genome.fa.*
 
 rm -rf results
 

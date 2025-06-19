@@ -9,9 +9,6 @@
 ### 0.94
 
 - Tuning runtime libraries for particular modules
-	- Python3
-	- bcftools
-	- TODO: verifybamid
 
 ### 0.93
 
