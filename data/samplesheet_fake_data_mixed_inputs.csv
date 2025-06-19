@@ -1,4 +1,0 @@
-id,input_format,normal_method,duplex_1,duplex_2,normal_1,normal_2
-experiment1,fastq,duplex,./data/reads/duplex1.fq.gz,./data/reads/duplex2.fq.gz,./data/reads/normal1.fq.gz,./data/reads/normal2.fq.gz
-experiment2,fastq,standard,./data/reads/duplex1.fq.gz,./data/reads/duplex2.fq.gz,./data/reads/normal1.fq.gz,./data/reads/normal2.fq.gz
-experiment3,cram,standard,./data/reads/duplex.mark.cram,./data/reads/duplex.mark.cram.crai,./data/reads/normal.mark.cram,./data/reads/normal.mark.cram.crai
