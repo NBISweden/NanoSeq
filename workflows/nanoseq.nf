@@ -24,6 +24,7 @@ Main workflow
 	include { VARIANT_CALLING } from '../modules/variant-calling.nf'
 	include { INDEL } from '../modules/indel.nf'
 	include { POST_PROCESS } from '../modules/post-process.nf'
+	include { VARIANT_ALLELE_FREQUENCY } from '../modules/variant-allele-frequency.nf'
 
 // Main workflow
 
@@ -153,9 +154,34 @@ Main workflow
 					}
 					.set { ch_variant_indel }
 
-			// Post-processing
+			// Nanoseq analysis post-processing
 
 				POST_PROCESS (ch_variant_indel, ch_reference.collect(), INDEX_REFERENCE.out.ch_indexes.collect())
+
+			// Variant allele frequency calculation
+
+				// Join nanoseq output with deduplicated duplex CRAM
+
+				POST_PROCESS.out.ch_post_process
+					.map { meta, mut, indel, cov ->
+						// Remove type, no longer required & interferes with join to deduplicated CRAM
+						def metaNew = meta.clone()
+						metaNew.remove('type')
+						[ metaNew, mut, indel, cov]
+					}
+					.join(
+				DEDUPLICATE.out.ch_cram
+					.filter { meta, deduplicated -> meta.type == 'duplex' }
+					.map { meta, deduplicated ->
+						// Remove type, no longer required & interferes with join to post-processed variants
+						def metaNew = meta.clone()
+						metaNew.remove('type')
+						[metaNew, deduplicated]
+					}
+					)
+					.set { ch_vfa_input }
+
+				VARIANT_ALLELE_FREQUENCY (ch_vfa_input)
 
 			// Report package versions
 
