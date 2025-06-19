@@ -2,10 +2,12 @@ process POST_PROCESS {
 
 	// Directives
 
-	debug true
+	debug false
 	tag "${meta.id}"
 	label 'process_low'
 	container 'docker://ghcr.io/nbisweden/nanoseq-src:latest'
+
+	// I/O & script
 
 	input:
 	tuple val(meta), path(crams), path(var1), path(var2), path(var3), path(indel1), path(indel2)
@@ -13,15 +15,10 @@ process POST_PROCESS {
 	path indexes
 
 	output:
-	//FIXME:	next job, outputs from this, and back to last nextflow main processes
-
-
-	// tuple val(meta), path("post/${meta.id}.muts.vcf.gz"), path( "post/${meta.id}.muts.vcf.gz.tbi"), 
-	// 	path("post/${meta.id}.indel.vcf.gz"), path( "post/${meta.id}.indel.vcf.gz.tbi"), path("post/${meta.id}.cov.bed.gz"), 
-	// 	path( "post/${meta.id}.cov.bed.gz.tbi"), emit: results
-	// path("post/*.csv"), emit: csv
-	// path("post/*.tsv"), emit: tsv optional true
-	// path("post/*.pdf"), emit: pdf optional true
+	tuple val(meta), path("${meta.id}.muts.vcf.gz*"), path("${meta.id}.indel.vcf.gz*"), path("${meta.id}.cov.bed.gz*"), emit: ch_post_process
+	path("*.csv"), emit: ch_csv
+	path("*.tsv"), emit: ch_tsv, optional: true
+	path("*.pdf"), emit: ch_pdf, optional: true
 
 	script:
 	def args = task.ext.args ?: ''
@@ -46,7 +43,7 @@ process POST_PROCESS {
 
 	# Run post-processing script
 
-		post.py --ref ${reference_fasta} --duplex ${crams[0]} --normal ${crams[2]} --threads ${task.cpus} post --name ${meta.id} ${args}
+		nanoseq.py --ref ${reference_fasta} --duplex ${crams[0]} --normal ${crams[2]} --threads ${task.cpus} post --name ${meta.id} ${args}
 
 	"""
 
