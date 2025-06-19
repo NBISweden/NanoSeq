@@ -59,7 +59,7 @@ The workflow performs preprocessing & NanoSeq analysis of duplex sequencing data
 ### Preprocessing
 
 1) `ADD_NANOSEQ_FASTQ_TAGS`: trims duplex barcodes from the fastq files and adds them to the fastq header of each read (rb, mb tags)
-2) `BWA_MEM2_MAP`: maps reads to the reference genome using `bwa` with option `-C to add the barcodes as tags in the bam
+2) `INDEX` & `BWA_MEM2_MAP`: maps reads to the indexed reference genome using `bwa` with option `-C to add the barcodes as tags in the bam
 3) `MARK_DUPLICATES`: mark optical duplicates, add rc & mc tags
 4) `ADD_READ_BUNDLES`: filters optical duplicates, unpaired mates, and creates the RB tag (RB:rc,mc,rb,mb) for read bundles
 5) `DEDUPLICATE`: removes PCR duplicates, keeps one read-pair per read bundle to produce a 'neat' matched normal file (to distinguish somatic mutations from germline SNPs)
