@@ -15,7 +15,7 @@ process VARIANT_CALLING {
 	path indexes
 
 	output:
-	tuple val(meta), path(crams), path("${meta.jobindex}.var"), path("${meta.jobindex}.cov.bed.gz"), path("${meta.jobindex}.discarded_var"), emit: ch_variant_calling
+	tuple val(meta), path(crams), path("${meta.jobindex}.var"), path("${meta.jobindex}.varCov.bed.gz"), path("${meta.jobindex}.discarded_var"), emit: ch_variant_calling
 	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions
 	tuple val(task.process), val('nanoseq.py'), eval('nanoseq.py -v'), topic: versions
 

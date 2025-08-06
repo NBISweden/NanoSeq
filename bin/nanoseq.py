@@ -877,7 +877,7 @@ if (args.subcommand == 'var'):
 	# Construct variantcaller commands
 	commands = [(None,)] * njobs
 	for i in range(njobs):
-		cmd = f"variantcaller -B {tmpDir}/{i+1}.dsa.bed.gz -U {tmpDir}/{i+1}.cov.bed -O {tmpDir}/{i+1}.var -D {tmpDir}/{i+1}.discarded_var -a {args.a} -b {args.b} -c {args.c} -d {args.d} -f {args.f} -i {args.i} -m {args.m} -n {args.n} -p {args.p} -q {args.q} -r {args.r} -v {args.v} -x {args.x} -z {args.z}"
+		cmd = f"variantcaller -B {tmpDir}/{i+1}.dsa.bed.gz -U {tmpDir}/{i+1}.varCov.bed -O {tmpDir}/{i+1}.var -D {tmpDir}/{i+1}.discarded_var -a {args.a} -b {args.b} -c {args.c} -d {args.d} -f {args.f} -i {args.i} -m {args.m} -n {args.n} -p {args.p} -q {args.q} -r {args.r} -v {args.v} -x {args.x} -z {args.z}"
 		commands[i] = (cmd, )
 
 	# TODO: add back in the check for empty files. See indel section where it's implemented for the specific index number (not in the loop).
@@ -1039,10 +1039,10 @@ if (args.subcommand == 'post'):
 
 	# Merge coverage files
 	print("\nMerge coverage files for var\n")
-	outFile = f"{tmpDir}/{args.name}.cov.bed"
+	outFile = f"{tmpDir}/{args.name}.varCov.bed"
 	cmd = f"rm -f {outFile};"
 	for i in range(nfiles):
-		ifile = f"{tmpDir}/{i+1}.cov.bed.gz"
+		ifile = f"{tmpDir}/{i+1}.varCov.bed.gz"
 		if ( os.stat(ifile).st_size == 0 ) : continue
 		cmd += f"bgzip -dc {ifile} >> {outFile} ;"
 	cmd += f"bgzip -@ {args.threads} -f {outFile}; sleep 3; bgzip -@ {args.threads} -t {outFile}.gz;"
