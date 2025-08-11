@@ -4,18 +4,23 @@ channels = ["conda-forge", "bioconda"]
 description = "NanoSeq base dependencies"
 name = "NanoSeq pixi base"
 platforms = ["linux-64"]
-version = "0.1.2"
+version = "0.2.0"
 
 [system-requirements]
 linux="3.10"
 
 [tasks]
+help = { cmd = "nextflow main.nf --help" }
 dag = { cmd = "nextflow main.nf -preview -with-dag flowchart.png" }
 test = { cmd = "nextflow main.nf -profile standard,apptainer --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa" }
-help = { cmd = "nextflow main.nf --help" }
 
 [dependencies]
 nextflow="==25.04.6"
-apptainer="==1.4.1"
 graphviz="==12.2.1"
 msmtp-sendmail="==1.8.28"
+
+[feature.apptainer.dependencies]
+apptainer="==1.4.1"
+
+[environments]
+apptainer = ["apptainer"]
