@@ -15,7 +15,7 @@ test = { cmd = "nextflow main.nf -profile standard,apptainer --samplesheet data/
 help = { cmd = "nextflow main.nf --help" }
 
 [dependencies]
-nextflow="==24.10.4"
-apptainer="==1.3.6"
+nextflow="==25.04.6"
+apptainer="==1.4.1"
 graphviz="==12.2.1"
 msmtp-sendmail="==1.8.28"

@@ -13,8 +13,7 @@ process EFFICIENCY {
 	path indexes
 
 	output:
-	path "${meta.id}_${meta.type}.efficiency*tsv", emit: ch_efficiency_tsv
-	path "${meta.id}_${meta.type}.efficiency.RBs.pdf", emit: ch_efficiency_pdf
+	tuple val(meta), path("${meta.id}_${meta.type}.efficiency.tsv"), path("${meta.id}_${meta.type}.efficiency.RBs.GC_inserts.tsv"), path("${meta.id}_${meta.type}.efficiency.RBs.pdf"), emit: ch_efficiency_out
 
 	script:
 	"""

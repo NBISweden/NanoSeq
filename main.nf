@@ -39,9 +39,11 @@ Changes made to the original codebase are summarised in the CHANGES.md file, and
 
 		publish:
 
-			NANOSEQ.out.ch_efficiency_tsv >> 'efficiency'
-			NANOSEQ.out.ch_efficiency_pdf >> 'efficiency_plot'
-			NANOSEQ.out.ch_versions >> 'package_versions'
+			efficiency = NANOSEQ.out.ch_efficiency_out
+			results_one = NANOSEQ.out.results_one
+			results_two = NANOSEQ.out.results_two
+			results_three = NANOSEQ.out.results_three
+			package_versions = NANOSEQ.out.ch_versions
 
 	}
 
@@ -50,13 +52,25 @@ Changes made to the original codebase are summarised in the CHANGES.md file, and
 	output {
 
 		efficiency {
-			path 'efficiency_reports'
+			path { meta, one, two, three -> "${meta.id}/efficiency_reports" }
 			mode 'copy'
 			overwrite false
 		}
 
-		efficiency_plot {
-			path 'efficiency_reports'
+		results_one {
+			path { meta, one, two, three -> "${meta.id}/variant_calling" }
+			mode 'copy'
+			overwrite false
+		}
+
+		results_two {
+			path { meta, one, two, three, four, five -> "${meta.id}/variant_calling_summary_files" }
+			mode 'copy'
+			overwrite false
+		}
+
+		results_three {
+			path { meta, one -> "${meta.id}/variant_allele_frequency" }
 			mode 'copy'
 			overwrite false
 		}

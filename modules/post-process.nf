@@ -16,7 +16,8 @@ process POST_PROCESS {
 
 	output:
 	tuple val(meta), path("${meta.id}.muts.vcf.gz*"), path("${meta.id}.indel.vcf.gz*"), path("${meta.id}.varCov.bed.gz*"), emit: ch_post_process
-	path("*.csv"), emit: ch_csv
+	tuple val(meta), path("*.csv"), path("summary.txt"), path("${meta.id}.*.pdf"), path("${meta.id}.*.tsv"), path("${meta.id}.*.pvals"), emit: ch_post_process2
+		path("*.csv"), emit: ch_csv
 	path("*.tsv"), emit: ch_tsv, optional: true
 	path("*.pdf"), emit: ch_pdf, optional: true
 	tuple val(task.process), val('python'), eval('python --version | sed "s/.* //"'), topic: versions

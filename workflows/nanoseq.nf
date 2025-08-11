@@ -6,7 +6,6 @@ Main workflow
 
 // Feature flags
 
-	nextflow.preview.topic = true
 	nextflow.preview.output = true
 
 // Import modules
@@ -199,8 +198,10 @@ Main workflow
 
 			// Emit channels for publication
 
-				ch_efficiency_tsv = EFFICIENCY.out.ch_efficiency_tsv
-				ch_efficiency_pdf = EFFICIENCY.out.ch_efficiency_pdf
+				ch_efficiency_out = EFFICIENCY.out.ch_efficiency_out
+				results_one = POST_PROCESS.out.ch_post_process
+				results_two = POST_PROCESS.out.ch_post_process2
+				results_three = VARIANT_ALLELE_FREQUENCY.out.ch_vaf_out
 				ch_versions = ch_versions
 
 	}
