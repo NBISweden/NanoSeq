@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0-NBIS] - TODO: DATE
+## [1.0.0-NBIS] - 20250812
 
 ### Base dependencies
 
@@ -57,7 +57,7 @@
 - Other named workflows have been removed and reimplemented as processes
 - Assorted scripts are now found in `bin`
 - Basic nextflow config now found in `nextflow.config`
-- Parameters are now exclusively defined in `conf/parameters.config`, these have been renamed
+- Parameters are now exclusively defined in `nextflow.config`, and have been renamed
 - Additional profiles have been defined, and all are now found in `conf/profiles.config`
 - any `ext.arg` variables are now found in `conf/modules.config`
 - Removed redundant configs/deprecated DSL statements
