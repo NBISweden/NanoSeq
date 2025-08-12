@@ -4,7 +4,7 @@
 
 NANOSEQ_REPO_PATH=~/nanoseq
 TMUX_SESSION_NAME=nanoseq
-PIXI_COMMAND="pixi run -e apptainer nextflow main.nf -profile baseHPC,apptainer --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa"
+PIXI_COMMAND="pixi run -e apptainer nextflow main.nf -profile baseHPC,apptainer --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa --account HOURS_BILLING_PROJECT"
 PIPELINE_NAME=NanoSeq
 
 
