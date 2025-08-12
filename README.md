@@ -42,7 +42,7 @@ Nanorate sequencing (NanoSeq) is a DNA library preparation and sequencing protoc
 - A typical small scale test with default settings looks like this:
 
 ```
-pixi run -e apptainer nextflow main.nf -profile standard,apptainer --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa
+pixi run -e apptainer nextflow main.nf -profile apptainer,standard --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa
 ```
 
 ## Required input files
@@ -58,7 +58,7 @@ NanoSeq takes a reference genome in FASTA format, and reads in FASTQ format. Rea
 ## Running on a cluster
 
 - An example `sbatch` script is found at `helper_scripts/sbatch-template.sh`
-- Clone the repository to your cluster and edit this script with the local path to the repo, your pixi command, and your hours billing account for SLURM executuion
+- Clone the repository to your cluster and edit this script with the local path to the repo, your pixi command, and your hours billing account for SLURM execution
 - Note that some clusters do not allow for personal `Apptainer` installations, thus use `pixi run` rather than `pixi run -e apptainer` in that case
 - Submit with `bash helper_scripts/sbatch-template.sh`
 
@@ -96,9 +96,10 @@ The workflow performs preprocessing & NanoSeq analysis of duplex sequencing data
 
 Where `NAME` = sample name, and `TYPE` = experiment type, i.e., normal or duplex
 
-### Main results folder
+### Main results folder (`nanoseq/results`)
 
-- `package_versions`: script/program version number reports for the run
+- `package_versions`:
+	- `package_versions.txt`: script/program version number reports for the run
 - `NAME`:
 	- `efficiency_reports`: tsv and pdf reports of sequencing efficiency
 	- `variant_allele_frequency`:

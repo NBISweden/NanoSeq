@@ -1,5 +1,11 @@
 # Changelog
 
+
+## [x.x.x-NBIS] -
+
+- Documentation tweaks
+
+
 ## [1.0.0-NBIS] - 20250812
 
 ### Base dependencies
