@@ -12,7 +12,7 @@ linux="3.10"
 [tasks]
 help = { cmd = "nextflow main.nf --help" }
 dag = { cmd = "nextflow main.nf -preview -with-dag flowchart.png" }
-test = { cmd = "nextflow main.nf -profile standard,apptainer --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa" }
+test = { cmd = "nextflow main.nf -profile apptainer,standard --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa" }
 
 [dependencies]
 nextflow="==25.04.6"
