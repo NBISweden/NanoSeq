@@ -96,7 +96,7 @@ The workflow performs preprocessing & NanoSeq analysis of duplex sequencing data
 
 Where `NAME` = sample name, and `TYPE` = experiment type, i.e., normal or duplex
 
-### Main results folder (`nanoseq/results`)
+### Main results folder (`NanoSeq/results`)
 
 - `package_versions`:
 	- `package_versions.txt`: script/program version number reports for the run
