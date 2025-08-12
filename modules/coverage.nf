@@ -28,14 +28,14 @@ process COVERAGE {
 
 	# Ensure all expected outputs were created
 
-	BEDS_EXPECTED=\$(cat nfiles || true)
-	NUMBER_BED_FILES=\$(ls *.cov.bed.gz 2>/dev/null | wc -l || true)
-	NUMBER_PROCESSED=\$(ls *.coverage_processed 2>/dev/null | wc -l || true)
+		BEDS_EXPECTED=\$(cat nfiles || true)
+		NUMBER_BED_FILES=\$(ls *.cov.bed.gz 2>/dev/null | wc -l || true)
+		NUMBER_PROCESSED=\$(ls *.coverage_processed 2>/dev/null | wc -l || true)
 
-	if [[ "\$BEDS_EXPECTED" -ne "\$NUMBER_BED_FILES" || "\$BEDS_EXPECTED" -ne "\$NUMBER_PROCESSED" ]]; then
-		echo "ERROR: Expected \$BEDS_EXPECTED bed files, found \$NUMBER_BED_FILES, of which \$NUMBER_PROCESSED were successfully processed"
-		exit 1
-	fi
+		if [[ "\$BEDS_EXPECTED" -ne "\$NUMBER_BED_FILES" || "\$BEDS_EXPECTED" -ne "\$NUMBER_PROCESSED" ]]; then
+			echo "ERROR: Expected \$BEDS_EXPECTED bed files, found \$NUMBER_BED_FILES, of which \$NUMBER_PROCESSED were successfully processed"
+			exit 1
+		fi
 
 	"""
 

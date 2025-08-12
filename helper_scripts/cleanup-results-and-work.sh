@@ -2,13 +2,19 @@
 
 shopt -s extglob
 
-rm ../data/genome/genome.fa.*
-rm ../data/test/genome.fa.*
+### Edit this line to your cloned repository
+cd ~/work/nanoseq
 
-rm -rf ../results
+# Clean indexes
+rm data/genome/genome.fa.*
+rm data/test/genome.fa.*
 
-if [ -d "../work" ]; then
-	cd ../work
+# Clean results
+rm -rf results
+
+# Clean work except pulled images
+if [ -d "work" ]; then
+	cd work
 	rm -rf  !(apptainer)
 else
   echo "Work directory does not exist."
