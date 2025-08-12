@@ -55,6 +55,13 @@ NanoSeq takes a reference genome in FASTA format, and reads in FASTQ format. Rea
 
 - `normal_method`: was the normal sample sequenced with the NanoSeq protocol or conventionally? Options are `duplex` or `standard`.
 
+## Running on a cluster
+
+- An example `sbatch` script is found at `helper_scripts/sbatch-template.sh`
+- Clone the repository to your cluster and edit this script with the local path to the repo, your pixi command, and your hours billing account for SLURM executuion
+- Note that some clusters do not allow for personal `Apptainer` installations, thus use `pixi run` rather than `pixi run -e apptainer` in that case
+- Submit with `bash helper_scripts/sbatch-template.sh`
+
 ## Workflow overview
 
 The workflow performs preprocessing & NanoSeq analysis of duplex sequencing data, see the image below for the process overview.
