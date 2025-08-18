@@ -42,7 +42,7 @@ void Usage() {
   fprintf(stderr, "\t-D\tMask BED file name\n");
   fprintf(stderr, "\t-R\tReference sequence file (faidx indexed)\n");
   fprintf(stderr, "\t-Q\tMinimum base quality for bulk sequencing (def 30)\n");
-  fprintf(stderr, "\t-M\tRemove duplex reads w/ MAPQ smaller than this (def 0)\n"); 
+  fprintf(stderr, "\t-M\tRemove duplex reads w/ MAPQ smaller than this (def 0)\n");
   fprintf(stderr, "\t-r\tReference or contig name\n");
   fprintf(stderr, "\t-b\tStart coordinate\n");
   fprintf(stderr, "\t-e\tEnd coordinate\n");

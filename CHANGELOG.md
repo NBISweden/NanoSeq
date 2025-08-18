@@ -1,10 +1,10 @@
 # Changelog
 
 
-## [x.x.x-NBIS] -
+## [1.0.1-NBIS] - 20250818
 
 - Documentation tweaks
-
+- Sync with upstream repo changes, up to `cancerit/NanoSeq` `79dab5c`
 
 ## [1.0.0-NBIS] - 20250812
 

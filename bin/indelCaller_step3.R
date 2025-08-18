@@ -94,7 +94,7 @@ if (nrow(vcf@fix) != 0) {
   for (i in c(1:nrow(vcf@fix))) {
     pos = strtoi(vcf@fix[i, "POS"])
     chr = vcf@fix[i, "CHROM"]
-    len = max(1, length(vcf@fix[i, "REF"]) - 1)
+    len = max(1, nchar(vcf@fix[i, "REF"]) - 1)
     start = pos - FLANK
     end = pos + len + FLANK
     kk = bam2R(bam_file, chr, start, end, q = -100, mask = 3844, mq = 10)
@@ -112,7 +112,7 @@ if (nrow(vcf@fix) != 0) {
     #} else if (n_indels/(n_bases + n_indels) > max_vaf) {
     #  vcf@fix[i, "FILTER"] = "NEI_IND"
     #  vcf@fix[i, "INFO"] = paste(vcf@fix[i, "INFO"], ";NN=[", n_indels, "/", n_bases, "]", sep = "")
-    } else if (max_per_site > max_vaf ) { 
+    } else if (max_per_site > max_vaf ) {
       vcf@fix[i, "FILTER"] = "NEI_IND"
       vcf@fix[i, "INFO"] = paste(vcf@fix[i, "INFO"], ";NN=[", n_indels, ":", n_bases, ":", max_per_site,"]", sep = "")
     } else {
@@ -141,5 +141,3 @@ write.vcf(vcf, file = out_vcf_file_tmp)
 bgzip(out_vcf_file_tmp, dest = out_vcf_file, overwrite = TRUE)
 unlink(out_vcf_file_tmp)
 indexTabix(out_vcf_file, format = "vcf")
-
-

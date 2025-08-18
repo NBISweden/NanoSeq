@@ -37,7 +37,7 @@ char ALPH[4] =
 std::map<char, int> INDEX =
   {{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
 
-std::map<char, char> COMPLEMENT = 
+std::map<char, char> COMPLEMENT =
   {{'A','T'}, {'C','G'}, {'G','C'}, {'T','A'}};
 
 
@@ -113,7 +113,7 @@ void VariantCaller::CallDuplex(row_t *row) {
   std::vector<int> f2r1 = {row->f2r1_A, row->f2r1_C, row->f2r1_G, row->f2r1_T};
   row->f1r2_call = 'N';
   row->f2r1_call = 'N';
-  for (int i = 0; i < 4; i++) { 
+  for (int i = 0; i < 4; i++) {
     if ((f1r2[i]/row->f1r2_canonical) >= this->frac) {
       row->f1r2_call = ALPH[i];
     }
@@ -135,7 +135,7 @@ int VariantCaller::DplxClipFilter(row_t *row) {
 
 int VariantCaller::AlignmentScoreFilter(row_t *row) {
   if ((row->bulk_asxs >= this->asxs) &&
-      (row->dplx_asxs >= this->asxs)) { 
+      (row->dplx_asxs >= this->asxs)) {
     return 1;
   } else {
     return 0;
@@ -230,7 +230,7 @@ int VariantCaller::FivePrimeTrimFilter(row_t *row) {
     }
   } else {
     assert(row->bndl_type == 3);
-    if ((row->left >= this->min_cycle) && 
+    if ((row->left >= this->min_cycle) &&
         (row->right >= this->min_cycle)) {
       return 1;
     } else {
@@ -321,7 +321,7 @@ int VariantCaller::VafFilter(row_t *row) {
 
 int VariantCaller::IsVariant(row_t *row) {
   if(row->context[1] != row->call) {
-    return 1;  
+    return 1;
   } else {
     return 0;
   }
@@ -478,7 +478,7 @@ void VariantCaller::CollectMetrics() {
         row.pyrcontext = VariantCaller::PyrimidineContext(&row);
         VariantCaller::ApplyFilters(&row); // Apply filters to row
         if(row.isvariant && row.f1r2_call != row.context[1] && row.f2r1_call != row.context[1]) { // fa8: these conditions are redundant
-	        row.vaf_filter = VariantCaller::VafFilter(&row); // fa8: This one has to go separately 
+	        row.vaf_filter = VariantCaller::VafFilter(&row); // fa8: This one has to go separately
     	                                                     // from the other filters
       	} else {
       		row.vaf_filter = 1;
@@ -1111,7 +1111,7 @@ void Options(int argc, char **argv, VariantCaller *vc) {
     er << std::endl;
     throw std::runtime_error(er.str());
   }
-  if (vc->outfile_discarded != NULL) { 
+  if (vc->outfile_discarded != NULL) {
     vc->fout_discarded.open(vc->outfile_discarded);
     if ( ! vc->fout_discarded.is_open() ) {
       std::stringstream er;

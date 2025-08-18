@@ -184,7 +184,7 @@ foreach my $rb_id (keys %indels) {
       $good_sites{$pos} = 1;
     } else {
       $bad_sites{$pos} = 0;
-    }  
+    }
   }
   if(scalar(keys(%good_sites)) == 0) {
     next; # all indels overlap noisy or common SNP sites
@@ -192,7 +192,7 @@ foreach my $rb_id (keys %indels) {
   $"=",";
   my @tmp = keys %{$indels{$rb_id}};
   my $positions = "@tmp";
-  print STDOUT "processing read bundle $rb_id ...\n"; 
+  print STDOUT "processing read bundle $rb_id ...\n";
   print STDOUT "Step 1...\n";
   open(BAM_OUT," | samtools view -bo $tempdir/$out_name.tmp.bam -") or die("\nError running: samtools view -bo $tempdir/$out_name.tmp.bam - :$!\n");
   open(BAM,"samtools view -h $botseq_bam_file \"$chr:$start-$end\" | ") or die( "\nError running : samtools view -h $botseq_bam_file $chr:$start-$end : $!\n");
@@ -203,7 +203,7 @@ foreach my $rb_id (keys %indels) {
     } else {
       my @fields = (split(/\t/,$_));
       $fields[1] = $fields[1] - 1024 if($fields[1] > 1024); #remove duplicate  flag
-      print BAM_OUT join "\t",@fields; 
+      print BAM_OUT join "\t",@fields;
     }
   }
   close( BAM_OUT);
@@ -214,16 +214,16 @@ foreach my $rb_id (keys %indels) {
   print STDOUT "Step 3...\n";
   #`samtools mpileup --no-BAQ  -d 250 -m 2 -F 0.5 -r $chr:$start-$end --BCF --output-tags DP,DV,DP4,SP -f $ref_genome -o $tempdir/$out_name.bcf $tempdir/$out_name.tmp.bam`;
   &runCmd("bcftools mpileup --no-BAQ --ignore-RG -L 250 -m 2 -F 0.5 -r \"$chr:$start-$end\" -O b -a DP,DV,DP4,SP -f $ref_genome -o $tempdir/$out_name.bcf $tempdir/$out_name.tmp.bam");
-  
+
   print STDOUT "Step 4...\n";
   &runCmd( "bcftools index -f $tempdir/$out_name.bcf $tempdir/$out_name.indexed.bcf");
 
   print STDOUT "Step 5...\n";
   #`bcftools call --skip-variants snps --multiallelic-caller --variants-only  -O v $tempdir/$out_name.bcf -o $tempdir/$out_name.tmp.vcf`;
-  &runCmd("bcftools call --ploidy 1 --skip-variants snps --multiallelic-caller --variants-only  -O v $tempdir/$out_name.bcf -o $tempdir/$out_name.tmp.vcf"); 
+  &runCmd("bcftools call --ploidy 1 --skip-variants snps --multiallelic-caller --variants-only  -O v $tempdir/$out_name.bcf -o $tempdir/$out_name.tmp.vcf");
 
   print STDOUT "Step 6...\n";
-  &runCmd("bcftools norm -f $ref_genome $tempdir/$out_name.tmp.vcf > $tempdir/$out_name.tmp2.vcf"); 
+  &runCmd("bcftools norm -f $ref_genome $tempdir/$out_name.tmp.vcf > $tempdir/$out_name.tmp2.vcf");
 
   #print "$rb_id:$positions:\n";
   my $get_header = 0;
@@ -340,7 +340,7 @@ foreach my $rb_id (keys %indels) {
 }
 print STDOUT "Step 8...\n";
 if (  $header eq "") { #minimal header for an empty vcf
-  print OUT "##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t$sample_name\n"; 
+  print OUT "##fileformat=VCFv4.2\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t$sample_name\n";
   OUT->flush();
 }
 close OUT or die("Error closing output pipe to $tempdir/$out_name.vcf.gz\n");
@@ -358,7 +358,7 @@ if ( defined $opts{'t'}) {
   my $newHead = "";
   foreach my $ichr ( @sortedChr ) {
     $newHead.="##contig=<ID=".$ichr.",length=".$chrdic{$ichr}.">\n";
-  } 
+  }
   open(VCFI,"<$tempdir/$out_name.vcf") or die ("Couldn't open $tempdir/$out_name.vcf\n");
   open(VCFO,">$tempdir/$out_name.sorted.vcf") or die ("Couldn't write to $out_dir/$out_name.sorted.vcf\n");
   my $writeNewHead = 1;
@@ -412,8 +412,8 @@ indelCaller_step2.pl  [options] -r ref -b BAM -o prefix input.bed.gz
 
 =item B<-out>
 
-Output prefix. 
-Final ouptput is a fileterd bed file.
+Output prefix.
+Final output is a filtered BED file.
 
 =item B<-ref>
 
@@ -425,7 +425,7 @@ Original NanoSeq BAM (CRAM) for sample.
 
 =item B<-keep>
 
-Do not remove teporary intermediate directory.
+Do not remove temporary intermediate directory.
 
 =item B<-index>
 
@@ -437,7 +437,7 @@ Sample name for the VCF output. (sample_1)
 
 =item B<-sort>
 
-Resort cotigs from vcf to be in normal biological order.
+Re-sort cotigs from vcf to be in normal biological order.
 
 =back
 
