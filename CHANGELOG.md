@@ -1,6 +1,11 @@
 # Changelog
 
 
+## [1.0.2-NBIS] - 
+
+- Disabled use of `$SNIC_TMP` scratch on rackham slurm profile, doesn't play well with storeDir. Observed this on another pipeline also, might be a nextflow idiosyncrasy/bug
+	- Strong recommend to use a system with a shared filesystem between nodes if possible
+
 ## [1.0.1-NBIS] - 20250818
 
 - Documentation tweaks
