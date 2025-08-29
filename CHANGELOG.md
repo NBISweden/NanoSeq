@@ -23,7 +23,7 @@
 
 #### Readme
 
-- Updated to reflect changes to codebase (instllation, usage, etc.)
+- Updated to reflect changes to codebase (installation, usage, etc.)
 
 #### Installation & dependencies
 
@@ -33,7 +33,7 @@
 - Further dependencies within processes are now handled by container images, pulled on the fly by Nextflow & Apptainer
 - Where possible, the Seqera containers service was used to build these (i.e., when all dependencies were available via conda channels)
 - For some processes, a more complex set of dependencies were required (e.g. custom C code, R, perl, scripts that called on others of a different type)
-- Here, a publically hosted docker image: [GitHub](https://github.com/NBISweden/NanoSeq/pkgs/container/nanoseq-src) has been created to cover the required tools, which is pulled by Apptainer during execution
+- Here, a [publically hosted docker image](https://github.com/NBISweden/NanoSeq/pkgs/container/nanoseq-src) has been created to cover the required tools, which is pulled by Apptainer during execution
 - A devcontainer.json file is provided for small scale testing in a cloud development environment
 
 #### Tool versions
