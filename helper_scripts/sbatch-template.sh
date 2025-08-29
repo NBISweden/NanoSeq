@@ -2,7 +2,7 @@
 
 # EDIT VARIABLES
 
-NANOSEQ_REPO_PATH=~/nanoseq
+REPO_PATH=~/nanoseq
 TMUX_SESSION_NAME=nanoseq
 PIXI_COMMAND="pixi run -e apptainer nextflow main.nf -profile apptainer,baseHPC --samplesheet data/test/samplesheet.csv --fasta data/test/genome.fa --account HOURS_BILLING_PROJECT"
 PIPELINE_NAME=NanoSeq
@@ -10,27 +10,27 @@ PIPELINE_NAME=NanoSeq
 
 ### DO NOT EDIT BELOW THIS LINE ###
 
-if [ -d "$NANOSEQ_REPO_PATH" ]; then
+if [ -d "$REPO_PATH" ]; then
 
-	cd $NANOSEQ_REPO_PATH
+	cd $REPO_PATH
 
-	tmux_version_output=$(tmux -V 2>&1)
+	TMUX_VERSION_OUTPUT=$(tmux -V 2>&1)
 
 	if [ $? -ne 0 ]; then
 		echo "Error: tmux not found"
 	else
-		if echo "$tmux_version_output" | grep -q "^tmux "; then
-			majorVersion=$(echo "$tmux_version_output" | sed 's/^tmux //;s/\..*$//')
-			if [ "$majorVersion" -eq 1 ]; then
+		if echo "$TMUX_VERSION_OUTPUT" | grep -q "^tmux "; then
+			MAJORVERSION=$(echo "$TMUX_VERSION_OUTPUT" | sed 's/^tmux //;s/\..*$//')
+			if [ "$MAJORVERSION" -eq 1 ]; then
 				tmux new-session -s "$TMUX_SESSION_NAME" -d
 				tmux send-keys -t "$TMUX_SESSION_NAME" "$PIXI_COMMAND" C-m
-				echo "Found tmux version $majorVersion"
+				echo "Found tmux version $MAJORVERSION"
 				echo "$PIPELINE_NAME pipeline started in tmux session: '$TMUX_SESSION_NAME', with command:"
 				echo "$PIXI_COMMAND"
 				echo "Monitor workflow progress in '.nextflow.log' or with 'squeue -u $USER'"
-			elif [ "$majorVersion" -ge 2 ]; then
+			elif [ "$MAJORVERSION" -ge 2 ]; then
 				tmux new -s "$TMUX_SESSION_NAME" -d /bin/bash -c "$PIXI_COMMAND"
-				echo "Found tmux version $majorVersion"
+				echo "Found tmux version $MAJORVERSION"
 				echo "$PIPELINE_NAME pipeline started in tmux session: '$TMUX_SESSION_NAME', with command:"
 				echo "$PIXI_COMMAND"
 				echo "Monitor workflow progress in '.nextflow.log' or with 'squeue -u $USER'"
@@ -42,6 +42,6 @@ if [ -d "$NANOSEQ_REPO_PATH" ]; then
 
 else
 
-	echo "Error: '$NANOSEQ_REPO_PATH' does not exist, set to the $PIPELINE_NAME repository path."
+	echo "Error: '$REPO_PATH' does not exist, set to the $PIPELINE_NAME repository path."
 
 fi
