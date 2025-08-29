@@ -48,7 +48,7 @@ import tempfile
 import copy
 
 # --- Modified version for Nextflow context --- #
-version = 'NBIS-1.0.1'
+version = 'NBIS-1.0.2'
 
 # Argument parser setup for NanoSeq pipeline
 parser = argparse.ArgumentParser()
