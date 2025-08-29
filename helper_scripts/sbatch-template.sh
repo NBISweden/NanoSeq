@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-# EDIT VARIABLES
+# EDIT THESE VALUES
 
 REPO_PATH=~/nanoseq
 TMUX_SESSION_NAME=nanoseq
